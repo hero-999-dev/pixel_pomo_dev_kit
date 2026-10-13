@@ -12,7 +12,7 @@ own engine (`App/flutter/lib/engine`, used as a package, not copied) and a
 `.vox` is converted by the game's own `vox_to_boxes.py`, so what stands in the
 kit's garden is what the game will draw.
 
-**Status: v0.1.2, released** in a private repository — [how to install it](INSTALL.md). Checked on Windows.
+**Status: v0.1.3, released** in a private repository — [how to install it](INSTALL.md). Checked on Windows.
 The macOS builds were made, tested and started without a window on GitHub's Macs; nobody has
 opened one on a Mac with a screen yet — see [What has and has not been tried](#what-has-and-has-not-been-tried).
 
@@ -286,7 +286,7 @@ copies the game's art in from `..\App`.
 Tests:
 
 ```powershell
-cd DevKit;      python -m unittest discover -s tests -t .     # the launcher (169)
+cd DevKit;      python -m unittest discover -s tests -t .     # the launcher (171)
 cd DevKit\app;  flutter test                                   # the page (67)
 cd DevKit;      python smoke.py                               # the built program, without its window
 ```

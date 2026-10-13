@@ -48,6 +48,7 @@ import sys
 import tempfile
 import threading
 import time
+import uuid
 from pathlib import Path
 
 from dev_kit import paths
@@ -256,7 +257,15 @@ def place(target, source=None, tell=None):
 def needs_admin(target):
     """Would Windows refuse this account the kit's folder at `target`? Asked
     of the nearest folder that exists, by trying: Windows' own "is it
-    writable" looks at a file's read-only tick, not at who may write."""
+    writable" looks at a file's read-only tick, not at who may write.
+
+    ONE try, made here. `tempfile` must not be given this job: told "access
+    denied" in a folder that exists, Python 3.12's takes it for a name that
+    is taken and tries another - two thousand million times. v0.1.2 as
+    released (built with 3.12) sat at "Starting... 0%" for exactly that
+    reason, while the same code built with 3.14 on the machine it was written
+    on answered at once.
+    """
     if not sys.platform.startswith("win"):
         return False
     folder = Path(target)
@@ -264,13 +273,18 @@ def needs_admin(target):
         if folder.parent == folder:
             return False
         folder = folder.parent
+    probe = folder / f".devkit-probe-{os.getpid()}-{uuid.uuid4().hex[:8]}"
     try:
-        with tempfile.TemporaryFile(dir=folder):
-            pass
+        handle = os.open(probe, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
     except PermissionError:
         return True
     except OSError:
         return False
+    os.close(handle)
+    try:
+        probe.unlink()
+    except OSError:
+        pass
     return False
 
 

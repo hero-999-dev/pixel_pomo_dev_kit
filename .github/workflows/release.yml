@@ -70,9 +70,13 @@ jobs:
             flutter/pubspec.yaml
           sparse-checkout-cone-mode: false
 
+      # The Python the kit is developed and tried with, not merely one that
+      # works: v0.1.2 was built here with 3.12 and tried at home with 3.14,
+      # and the one difference between them that mattered (see
+      # installer.needs_admin) reached an artist before it reached a test.
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.14'
 
       - name: What the kit needs that the game has not published yet
         run: python DevKit/game_ahead.py App

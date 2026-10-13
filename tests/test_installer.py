@@ -477,19 +477,57 @@ class Permission(InstallCase):
         deep = self.root / "not" / "there" / "yet"
         self.assertFalse(installer.needs_admin(deep))
         self.assertFalse((self.root / "not").exists())      # looking makes nothing
-        self.assertEqual(list(self.root.glob("tmp*")), [])  # and leaves nothing
+        self.assertEqual([p.name for p in self.root.iterdir() if p.name.startswith(".")],
+                         [])                                # and leaves nothing
         tried = []
 
-        def closed(dir=None, **kw):
-            tried.append(Path(dir))
+        def closed(path, flags, *more):
+            tried.append(Path(path).parent)
             raise PermissionError(13, "Access is denied")
-        with mock.patch.object(installer.tempfile, "TemporaryFile", closed):
+        with mock.patch.object(installer.os, "open", closed):
             self.assertTrue(installer.needs_admin(deep))
-        self.assertEqual(tried, [self.root])
+        self.assertEqual(tried, [self.root])                # once, not again and again
         # a drive that is not there is not a question of permission
-        with mock.patch.object(installer.tempfile, "TemporaryFile",
+        with mock.patch.object(installer.os, "open",
                                side_effect=FileNotFoundError(2, "gone")):
             self.assertFalse(installer.needs_admin(deep))
+
+    @unittest.skipUnless(sys.platform.startswith("win"), "Windows permissions")
+    def test_a_folder_windows_really_closes_is_answered_and_at_once(self):
+        # Not a stand-in: a folder this account is denied by Windows itself,
+        # as Program Files is. The answer has to come, and soon - v0.1.2's
+        # never did, on the Python the release is built with.
+        import subprocess
+        closed = self.root / "closed"
+        closed.mkdir()
+        sid = installer.account_sid()
+        denied = subprocess.run(["icacls", str(closed), "/deny", f"*{sid}:(WD,AD)"],
+                                capture_output=True, text=True)
+        self.assertEqual(denied.returncode, 0, denied.stdout + denied.stderr)
+        self.addCleanup(subprocess.run, ["icacls", str(closed), "/remove:d", f"*{sid}"],
+                        capture_output=True)
+        answers = []
+        asking = threading.Thread(
+            target=lambda: answers.append(installer.needs_admin(closed / paths.NAME)),
+            daemon=True)
+        started = time.monotonic()
+        asking.start()
+        asking.join(15)
+        self.assertFalse(asking.is_alive(), "needs_admin is still trying after 15 s")
+        self.assertEqual(answers, [True])
+        self.assertLess(time.monotonic() - started, 5)
+        self.assertEqual(list(closed.iterdir()), [])
+        # and the same folder, opened again, is no longer a question
+        subprocess.run(["icacls", str(closed), "/remove:d", f"*{sid}"], capture_output=True)
+        self.assertFalse(installer.needs_admin(closed / paths.NAME))
+        self.assertEqual(list(closed.iterdir()), [])
+
+    def test_nothing_here_hands_a_closed_folder_to_tempfile(self):
+        # see needs_admin: tempfile retries "access denied" without end
+        import inspect
+        source = inspect.getsource(installer)
+        for call in ("TemporaryFile(", "mkstemp(", "mkdtemp(", "TemporaryDirectory("):
+            self.assertNotIn("tempfile." + call, source)
 
     @unittest.skipUnless(sys.platform.startswith("win"), "Windows permissions")
     def test_this_account_has_a_name_windows_knows_it_by(self):
