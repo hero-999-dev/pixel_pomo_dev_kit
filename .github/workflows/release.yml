@@ -127,7 +127,7 @@ jobs:
           copy dist\PixelPomoDevKit.exe stage\
           copy READ-ME-FIRST.txt stage\
           copy assets\icon.png stage\
-          powershell Compress-Archive -Path stage\* -DestinationPath $env:ARTIFACT.zip -Force
+          Compress-Archive -Path stage\* -DestinationPath "$($env:ARTIFACT).zip" -Force
 
       - name: Package (macOS)
         if: runner.os == 'macOS'
