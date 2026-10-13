@@ -12,7 +12,7 @@ own engine (`App/flutter/lib/engine`, used as a package, not copied) and a
 `.vox` is converted by the game's own `vox_to_boxes.py`, so what stands in the
 kit's garden is what the game will draw.
 
-**Status: v0.1.4** (v0.1.3 is the latest released) in a private repository — [how to install it](INSTALL.md). Checked on Windows.
+**Status: v0.1.4, released** in a private repository — [how to install it](INSTALL.md). Checked on Windows.
 The macOS builds were made, tested and started without a window on GitHub's Macs; nobody has
 opened one on a Mac with a screen yet — see [What has and has not been tried](#what-has-and-has-not-been-tried).
 
