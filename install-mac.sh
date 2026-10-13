@@ -15,8 +15,7 @@
 # files in that folder - not in Documents, Desktop or Downloads, the three
 # places macOS asks permission for.
 #
-# NOT YET RUN ON A MAC, and it needs the repository to be public. Written from
-# Apple's documented behaviour.
+# NOT YET RUN ON A MAC. Written from Apple's documented behaviour.
 set -eu
 
 REPO="hero-999-dev/pixel_pomo_dev_kit"

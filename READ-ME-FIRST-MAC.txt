@@ -9,33 +9,39 @@ step below does not go as written, what happened instead is worth reporting
 exactly.
 
 
-INSTALL IT
+INSTALL IT - ONE LINE, NO WARNING
 
-  1. You downloaded PixelPomoDevKit-macos-....zip and this file was in it,
-     so there is now a folder called PixelPomoDevKit-macos-... in Downloads.
-     (Which zip: Apple menu > About This Mac. "Chip: Apple M..." is
-     apple-silicon; "Processor: ... Intel ..." is intel.)
+  Open Terminal (Cmd + Space, type "Terminal", Enter), paste this line and
+  press Enter:
 
-  2. Do NOT double-click the app yet. The Dev Kit is not signed with a paid
-     Apple developer account, so macOS refuses to open it straight from a
-     download ("Apple could not verify..."). One line removes that mark and
-     opens it. Open Terminal (Cmd + Space, type "Terminal", Enter), paste
-     this line and press Enter:
+    curl -fsSL https://github.com/hero-999-dev/pixel_pomo_dev_kit/releases/latest/download/install-mac.sh | sh
 
-    cd ~/Downloads && xattr -dr com.apple.quarantine PixelPomoDevKit-macos-* && open PixelPomoDevKit-macos-*/PixelPomoDevKit.app
+  It picks the right build for your Mac (Apple Silicon or Intel), fetches it
+  and opens the setup. macOS shows no "Apple could not verify..." warning,
+  because a file fetched this way is not marked as a browser's download.
 
-     Nothing is printed when it works. The setup window opens.
-
-  3. The setup asks where the Dev Kit should live and suggests
+  The setup asks where the Dev Kit should live and suggests
 
       /Applications/PixelPomoDevKit
 
-     Press INSTALL, then OPEN THE DEV KIT. Do not choose Documents, Desktop
-     or Downloads: those are the three folders macOS asks permission for.
+  Press INSTALL, then OPEN THE DEV KIT. Do not choose Documents, Desktop or
+  Downloads: those are the three folders macOS asks permission for.
 
-  4. From now on open it from /Applications/PixelPomoDevKit - drag the app
-     to the Dock to keep it there. The folder in Downloads can go in the
-     Trash.
+  From now on open it from /Applications/PixelPomoDevKit - drag the app to
+  the Dock to keep it there.
+
+
+IF YOU DOWNLOADED THE ZIP IN A BROWSER (this file was in it)
+
+  There is now a folder called PixelPomoDevKit-macos-... in Downloads. Do
+  NOT double-click the app in it yet: the Dev Kit is not signed with a paid
+  Apple developer account, so macOS refuses to open it straight from a
+  browser's download. One line in Terminal removes that mark and opens it:
+
+    cd ~/Downloads && xattr -dr com.apple.quarantine PixelPomoDevKit-macos-* && open PixelPomoDevKit-macos-*/PixelPomoDevKit.app
+
+  Nothing is printed when it works. The setup window opens; carry on as
+  above. The folder in Downloads can go in the Trash afterwards.
 
 
 IF YOU ALREADY DOUBLE-CLICKED IT AND macOS SAID NO
@@ -55,15 +61,6 @@ IF TERMINAL SAYS "No such file or directory"
 
   and a space, drag the PixelPomoDevKit app from Finder onto the Terminal
   window, press Enter, and then double-click the app.
-
-
-THE ONE-LINE INSTALL (only once the kit's repository is public)
-
-    curl -fsSL https://github.com/hero-999-dev/pixel_pomo_dev_kit/releases/latest/download/install-mac.sh | sh
-
-  It picks the right build, fetches it and opens the setup: no download to
-  unzip, no warning to get past. While the repository is private the line
-  cannot reach the files, and says the download failed.
 
 
 USE IT
@@ -100,10 +97,9 @@ YOUR FILES
 
 UPDATES
 
-  UPDATE, top right, says when a newer version is out. Click it: the kit
-  downloads it, closes, and opens again as the new version. It replaces the
-  app only; the Files folder is not touched. (It can only look for versions
-  once the kit's repository is public. Until then, a newer download opened
-  the same way as above updates the installed kit and keeps your files.)
+  UPDATE, top right, lights up when a newer version is out - the kit looks
+  each time it opens. Click it: the kit downloads the new version, closes,
+  and opens again as it. It replaces the app only; the Files folder is not
+  touched.
 
   devkit.log in the Files folder says what went wrong if the kit misbehaves.

@@ -57,12 +57,32 @@ def asset_name():
     return None
 
 
+# A release's text is what changed in it and then how to install it
+# (release_notes.py). The UPDATE panel is for someone who has the kit: it shows
+# what comes before this line, or before the install guide's first heading in
+# a release written before the line was.
+_NOT_NEWS = ("<!-- how to install -->", "## Install on ")
+
+
+def whats_new(body):
+    """The part of a release's text that says what changed."""
+    text = body or ""
+    for mark in _NOT_NEWS:
+        at = text.find(mark)
+        if at >= 0:
+            text = text[:at]
+    lines = [line for line in text.strip().splitlines()
+             if not line.startswith("## What is new in ")]
+    # the panel draws plain text: a mark for bold would show as two stars
+    return "\n".join(lines).strip().replace("**", "")
+
+
 class Release:
     def __init__(self, data):
         self.tag = str(data.get("tag_name", ""))
         self.version = parse(self.tag)
         self.url = data.get("html_url", RELEASES_PAGE)
-        self.notes = data.get("body") or ""
+        self.notes = whats_new(data.get("body"))
         self.assets = {a.get("name"): a.get("browser_download_url")
                        for a in data.get("assets", []) if a.get("name")}
 

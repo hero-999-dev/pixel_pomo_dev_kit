@@ -145,8 +145,8 @@ jobs:
 
       # Straight to the release, not via upload-artifact - see the Art Kit's
       # workflow for the storage quota that taught this. The release's text
-      # is INSTALL.md: how to install is the first thing on the page the
-      # download is on.
+      # is what changed (CHANGES.md, which the kit's UPDATE panel shows) and
+      # then INSTALL.md - see release_notes.py.
       - name: Publish to the release
         if: env.PUBLISH == 'yes'
         shell: bash
@@ -154,8 +154,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          python release_notes.py "$TAG" > release-notes.md
           gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
-            --title "Pixel Pomo Dev Kit $TAG" --notes-file INSTALL.md \
+            --title "Pixel Pomo Dev Kit $TAG" --notes-file release-notes.md \
             || echo "release already exists — uploading into it"
           gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
             "$ARTIFACT.zip"

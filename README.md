@@ -12,7 +12,7 @@ own engine (`App/flutter/lib/engine`, used as a package, not copied) and a
 `.vox` is converted by the game's own `vox_to_boxes.py`, so what stands in the
 kit's garden is what the game will draw.
 
-**Status: v0.1.4, released** in a private repository — [how to install it](INSTALL.md). Checked on Windows.
+**Status: v0.1.4, released** — [how to install it](INSTALL.md), [what changed](CHANGES.md). Checked on Windows.
 The macOS builds were made, tested and started without a window on GitHub's Macs; nobody has
 opened one on a Mac with a screen yet — see [What has and has not been tried](#what-has-and-has-not-been-tried).
 
@@ -59,13 +59,14 @@ setup, start a copy of the program from any other folder. (Not in CI.)
 **On a Mac** the kit is not signed with an Apple Developer ID, and macOS
 quarantines whatever a *browser* downloads — which is the "could not verify"
 warning and the trip through System Settings that the Art Kit's Mac guide
-spends two pages on. [`INSTALL.md`](INSTALL.md) is the guide (it is also the
-text of every release, above the downloads): download the zip, then one line
-in Terminal takes the quarantine mark off and opens the setup, with no warning.
-Once the repository is public there is a shorter way, `install-mac.sh` through
-`curl`, which is never quarantined in the first place. The other question the
-Art Kit's artists met, "allow access to Documents?", cannot come up: the kit
-keeps nothing in Documents, Desktop or Downloads.
+spends two pages on. A file fetched with `curl` is never quarantined, so the
+install is one line in Terminal (`install-mac.sh`, from the latest release):
+it picks the build for the Mac's processor, fetches it and opens the setup.
+[`INSTALL.md`](INSTALL.md) is the guide — it is also the text of every
+release, under what changed in it — and has the other way too: download the
+zip, then one line takes the quarantine mark off. The other question the Art
+Kit's artists met, "allow access to Documents?", cannot come up: the kit keeps
+nothing in Documents, Desktop or Downloads.
 
 ## Where the files are
 
@@ -313,7 +314,7 @@ copies the game's art in from `..\App`.
 Tests:
 
 ```powershell
-cd DevKit;      python -m unittest discover -s tests -t .     # the launcher (171)
+cd DevKit;      python -m unittest discover -s tests -t .     # the launcher (179)
 cd DevKit\app;  flutter test                                   # the page (77)
 cd DevKit;      python smoke.py                               # the built program, without its window
 ```
@@ -385,7 +386,7 @@ Not tried:
 - **The desktop shortcut's look.** The shortcut is made and points at the program; its icon on a real Desktop has not been seen.
 - **The folder BROWSE button** in the setup window: it opens the system's folder dialog, which a script cannot answer. The typed path was used instead.
 - **macOS, on a Mac with a screen.** The release workflow builds the `.app` on Apple Silicon and Intel runners, runs both test suites there and starts the packaged app without its window (`smoke.py`: it answers, serves its page, converts a `.vox`). Never run: the window, the setup window, the install into `/Applications`, the steps of `INSTALL.md` (the quarantine line, Safari's unzipping), `install-mac.sh`, and the Mac update hand-off — all written from Apple's documented behaviour and the Art Kit's working Mac build.
-- **UPDATE against a real release.** The repository is private, so the kit's question to GitHub is answered "not found" and it says nothing is published. The mechanism was tried against a pretend release only.
+- ~~UPDATE against a real release~~ — tried once the repository was public: a v0.1.3 installed from its release saw v0.1.4 when it opened, and UPDATE took it there in twelve seconds, a model added before still in its library, the 0.1.3 program in `Files\updates`.
 - **The fallback** for a Windows without WebView2 was exercised in v0.1.0's first build; its yes/no setup box was not.
 - **Frame rate with a heavy imported model on a real phone.** The kit shows how a model looks, not how fast a phone draws it.
 - **What went wrong on the first ADD in v0.1.0** ("it crashed on the first one, the next two worked"): not reproduced, and that machine's log could not be read from here. Windows recorded no crash. v0.1.0 showed nothing at all while a model was being converted, which for a large file is 10 to 25 seconds of a still window; v0.1.1 says what it is doing, cuts that time down, and writes every ADD and every error of the page to `devkit.log`, in a folder that can be read next time.
