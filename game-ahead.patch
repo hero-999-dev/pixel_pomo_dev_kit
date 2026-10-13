@@ -79,10 +79,10 @@ literal 0
 HcmV?d00001
 
 diff --git a/flutter/lib/engine/garden_engine.dart b/flutter/lib/engine/garden_engine.dart
-index 99ee078..c2a8eec 100644
+index 99ee078..47a245c 100644
 --- a/flutter/lib/engine/garden_engine.dart
 +++ b/flutter/lib/engine/garden_engine.dart
-@@ -597,20 +597,98 @@ class BoxMesh {
+@@ -597,20 +597,115 @@ class BoxMesh {
    /// checked against the ones we hand-write. The painter needs only [boxes].
    final double tiles;
    final List<MeshBox> boxes;
@@ -112,21 +112,38 @@ index 99ee078..c2a8eec 100644
 +  late final double height =
        boxes.map((b) => b.z + b.h).reduce((a, b) => a > b ? a : b);
 +
-+  double? _batchYaw;
-+  ui.Vertices? _batch;
++  // One list for each angle a copy of this mesh stands at, each good for one
++  // camera yaw. In order of use: asking for one moves it to the back.
++  final Map<double, (double, ui.Vertices)> _batches = {};
++
++  /// How many placement angles keep their list. Past this the one unused
++  /// longest is dropped — and built again if it is still in the garden, so
++  /// the number is set above what a garden holds: every 15 degrees is 24.
++  static const int keptBatches = 24;
 +
 +  /// Every face the camera can see at [yaw], as ONE triangle list — see
 +  /// [meshTriangles]. Built when the yaw changes and kept until it changes
 +  /// again, so a garden that is not being twisted pays one draw call a
 +  /// building and no geometry at all.
-+  ui.Vertices batchFor(double yaw) {
-+    final kept = _batch;
-+    if (kept != null && _batchYaw == yaw) return kept;
-+    kept?.dispose();
-+    final tri = meshTriangles(this, yaw);
-+    _batchYaw = yaw;
-+    return _batch =
++  ///
++  /// [placed] is how far this copy is turned where it stands (radians). Each
++  /// angle keeps its own list: two copies at two angles are two lists, both
++  /// kept, not one list rebuilt twice a frame.
++  ui.Vertices batchFor(double yaw, {double placed = 0}) {
++    final kept = _batches.remove(placed);
++    if (kept != null && kept.$1 == yaw) {
++      _batches[placed] = kept;
++      return kept.$2;
++    }
++    kept?.$2.dispose();
++    if (_batches.length >= keptBatches) {
++      _batches.remove(_batches.keys.first)!.$2.dispose();
++    }
++    final tri = meshTriangles(this, yaw + placed);
++    final made =
 +        ui.Vertices.raw(ui.VertexMode.triangles, tri.positions, colors: tri.colors);
++    _batches[placed] = (yaw, made);
++    return made;
 +  }
 +}
 +
@@ -184,7 +201,7 @@ index 99ee078..c2a8eec 100644
  }
  
  /// Back-to-front paint order for one mesh's boxes at the current yaw.
-@@ -618,27 +696,32 @@ class BoxMesh {
+@@ -618,27 +713,37 @@ class BoxMesh {
  /// Keyed on each box's own footprint centre, so a far wall paints before the
  /// near one and the house does not turn inside out as the garden is twisted.
  /// [stableDepthOrder] keeps tied (stacked) boxes in their authored order.
@@ -203,9 +220,7 @@ index 99ee078..c2a8eec 100644
  
 -/// Draw [mesh] standing on the tile at [gridCentre]: every box as four side
 -/// quads plus its brighter top, in back-to-front order.
-+/// Draw [mesh] standing on the tile at [gridCentre]: every box as its
-+/// camera-facing walls plus its brighter top, back to front, in one draw call.
- void paintMesh(Canvas canvas, Projector p, Offset gridCentre, BoxMesh mesh) {
+-void paintMesh(Canvas canvas, Projector p, Offset gridCentre, BoxMesh mesh) {
 -  for (final i in meshDrawOrder(p, gridCentre, mesh)) {
 -    final b = mesh.boxes[i];
 -    final c = boxCornersAt(
@@ -217,12 +232,20 @@ index 99ee078..c2a8eec 100644
 -    }
 -    fillQuad(canvas, c[4], c[5], c[6], c[7], Color(b.top));
 -  }
++/// Draw [mesh] standing on the tile at [gridCentre]: every box as its
++/// camera-facing walls plus its brighter top, back to front, in one draw call.
++///
++/// [placed] turns this one copy about its own vertical axis, in radians, on
++/// top of the mesh's own [BoxMesh.turn].
++void paintMesh(Canvas canvas, Projector p, Offset gridCentre, BoxMesh mesh,
++    {double placed = 0}) {
 +  final at = p.projectGrid(gridCentre);
 +  canvas.save();
 +  canvas.translate(at.dx, at.dy);
 +  canvas.scale(p.t);
 +  // BlendMode.dst: the vertices carry the colours, the paint adds none.
-+  canvas.drawVertices(mesh.batchFor(p.yaw + mesh.turn), BlendMode.dst, _meshPaint);
++  canvas.drawVertices(
++      mesh.batchFor(p.yaw + mesh.turn, placed: placed), BlendMode.dst, _meshPaint);
 +  canvas.restore();
  }
  
@@ -231,6 +254,19 @@ index 99ee078..c2a8eec 100644
  // ---- sprite bank ------------------------------------------------------------
  
  /// Decoded PNGs from assets/objects/, keyed by id. Critters are 8-frame
+@@ -1211,7 +1316,11 @@ class GardenPainter extends CustomPainter {
+           // house is many quads, and a panned-away garden shouldn't pay for it.
+           if (anchor.dy < 0 || anchor.dy - mesh.height * p.t > size.height) continue;
+           final gc = p.gridOf(c, r);
+-          standing.add((anchor.dy, () => paintMesh(canvas, p, gc, mesh)));
++          // turned where it stands, if whoever placed it turned it (the Dev
++          // Kit does; the game places everything square)
++          final placed = garden.turnAt(r * _cols + c) * math.pi / 180;
++          standing.add(
++              (anchor.dy, () => paintMesh(canvas, p, gc, mesh, placed: placed)));
+         } else if (Placeables.isFence(prop)) {
+           standing.add((anchor.dy, () => _paintFencePost(canvas, p, c, r, prop)));
+         } else if (Placeables.isFlower(prop)) {
 diff --git a/flutter/lib/engine/garden_view.dart b/flutter/lib/engine/garden_view.dart
 index 1a067cc..f43da04 100644
 --- a/flutter/lib/engine/garden_view.dart
@@ -359,7 +395,7 @@ index 1a067cc..f43da04 100644
                            onScaleStart: _onScaleStart,
                            onScaleUpdate: _onScaleUpdate,
 diff --git a/flutter/lib/logic.dart b/flutter/lib/logic.dart
-index 8e9b2f6..53768ca 100644
+index 8e9b2f6..f5ce664 100644
 --- a/flutter/lib/logic.dart
 +++ b/flutter/lib/logic.dart
 @@ -552,9 +552,11 @@ class Flowers {
@@ -423,6 +459,76 @@ index 8e9b2f6..53768ca 100644
    static bool isTestHouse(String id) => testHouseIds.contains(id);
    static bool isFlower(String id) => id.isNotEmpty && !isObject(id);
  
+@@ -706,12 +715,40 @@ class Placeables {
+       if (isRoad(p)) {
+         road = p;
+       } else {
+-        prop = p;
++        prop = unturned(p);
+       }
+     }
+     return (road, prop);
+   }
+ 
++  /// A building may be stored with an `@N` suffix: the N whole degrees it is
++  /// turned about its own vertical axis on that tile ("house_wood@90"). It is
++  /// that one placement's — a mesh's own `turn` belongs to every copy of it.
++  /// The game places everything unturned and writes no suffix; the Dev Kit
++  /// lets an artist turn each placement, and the painter honours what is
++  /// stored. [split], and so [Garden.propAt], give the id without it, so
++  /// nothing that asks "what stands here" ever meets the suffix.
++  static String unturned(String id) {
++    final i = id.indexOf('@');
++    return i < 0 ? id : id.substring(0, i);
++  }
++
++  /// The degrees, 0..359, the standing thing in a stored tile value is turned.
++  static int turnOf(String? value) {
++    if (value == null) return 0;
++    for (final p in value.split('+')) {
++      final i = p.indexOf('@');
++      if (i >= 0) return (int.tryParse(p.substring(i + 1)) ?? 0) % 360;
++    }
++    return 0;
++  }
++
++  /// [id] as it is stored when turned [degrees]; a whole turn is no turn.
++  static String turned(String id, int degrees) {
++    final d = degrees % 360;
++    return d == 0 ? unturned(id) : '${unturned(id)}@$d';
++  }
++
+   static String? groundOf(String? value) => value == null ? null : split(value).$1;
+   static String? propOf(String? value) => value == null ? null : split(value).$2;
+ 
+@@ -804,12 +841,17 @@ class Garden {
+   /// The standing prop (flower or fence) on a tile, or null.
+   String? propAt(int i) => Placeables.propOf(tiles[i]);
+ 
++  /// How far the building on a tile is turned where it stands, in degrees.
++  int turnAt(int i) => Placeables.turnOf(tiles[i]);
++
+   /// Place [id] on [index], honouring the layering rules:
+   /// • a flower only grows on bare grass (rejected if a road is there);
+   /// • a fence stands on grass or on top of a road (keeps the road);
+   /// • a road slides under an existing fence (keeps the fence) but clears a
+   ///   flower, since flowers can't sit on roads.
+-  Garden plant(int index, String id) {
++  ///
++  /// [turn] is for a building only: the degrees it is turned on this tile.
++  Garden plant(int index, String id, {int turn = 0}) {
+     if (!isValidIndex(index) || id.trim().isEmpty) return this;
+     final current = tiles[index];
+     final (road, prop) = current == null ? (null, null) : Placeables.split(current);
+@@ -823,7 +865,7 @@ class Garden {
+     } else {
+       // flower — only on bare grass
+       if (road != null) return this;
+-      value = id;
++      value = Placeables.isHouse(id) ? Placeables.turned(id, turn) : id;
+     }
+     return Garden(cols: cols, rows: rows, tiles: {...tiles, index: value});
+   }
 diff --git a/flutter/tools/gen_objects.py b/flutter/tools/gen_objects.py
 index dbbe610..690627e 100644
 --- a/flutter/tools/gen_objects.py

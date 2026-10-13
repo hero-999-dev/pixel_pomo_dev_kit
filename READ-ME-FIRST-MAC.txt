@@ -78,7 +78,12 @@ USE IT
   something you added: CHANGE and MOVE TO TRASH. TRASH, top right, puts a
   thing back or deletes it for good.
 
-  Right mouse button + drag turns the garden. Scrolling zooms. VIEW switches
+  To turn ONE thing: pick a 3D model, set TURN (right of the line under the
+  garden: the arrows, the Q and E keys, or a number from 0 to 360), then
+  click a tile. Each copy keeps the angle it was placed at. Click a placed
+  copy with another TURN set and it turns where it stands.
+
+  Right mouse button + drag turns the whole garden, as a camera would. Scrolling zooms. VIEW switches
   between the browser look and a phone's screen. GUIDE has the rest.
 
 

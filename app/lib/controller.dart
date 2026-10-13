@@ -48,6 +48,22 @@ class KitController extends ChangeNotifier {
   bool erasing = false;
   bool get brushing => erasing || brushItem != null;
 
+  /// The angle the next model is placed at, in degrees: its own, tile by
+  /// tile, on top of the turn the model was added with. It stays as set from
+  /// one piece to the next, so a row of things can go down at one angle.
+  int brushTurn = 0;
+
+  /// Is the thing on the brush one that can be turned where it stands?
+  bool get brushTurns => !erasing && brushItem != null && turnsWherePlaced(brushItem!);
+
+  void setBrushTurn(int degrees) {
+    if (degrees % 360 == brushTurn) return;
+    brushTurn = degrees % 360;
+    notifyListeners();
+  }
+
+  void turnBrush(int by) => setBrushTurn(brushTurn + by);
+
   /// The line under the garden. [statusIsError] paints it as a refusal.
   String status = '';
   bool statusIsError = false;
@@ -162,7 +178,7 @@ class KitController extends ChangeNotifier {
     if (erasing) {
       garden = garden.clear(index);
     } else if (item != null) {
-      final next = brush(garden, index, item);
+      final next = brush(garden, index, item, turn: brushTurn);
       if (identical(next, garden)) {
         // the only refusal Garden.plant has: something that grows, on a path
         _say('${item.name} cannot stand on a path — that is the game\'s own rule.', error: true);

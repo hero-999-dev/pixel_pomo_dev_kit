@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart' show PointerScrollEvent;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show KeyEvent, KeyUpEvent, LogicalKeyboardKey;
 import 'package:pixel_pomo/engine/garden_engine.dart';
 import 'package:pixel_pomo/engine/garden_view.dart';
 import 'package:pixel_pomo/logic.dart';
@@ -42,6 +43,69 @@ Widget kitButton(String text, VoidCallback? onTap,
       opacity: enabled ? 1 : 0.4,
       onTap: enabled ? onTap : null,
     );
+
+/// TURN: the angle the model on the brush is placed at. Two arrows a step
+/// each way, and the number itself, which can be typed.
+class TurnControl extends StatefulWidget {
+  final KitController kit;
+  const TurnControl(this.kit, {super.key});
+
+  @override
+  State<TurnControl> createState() => _TurnControlState();
+}
+
+class _TurnControlState extends State<TurnControl> {
+  late int _shown = widget.kit.brushTurn;
+  late final TextEditingController _text = TextEditingController(text: '$_shown');
+
+  @override
+  void initState() {
+    super.initState();
+    widget.kit.addListener(_follow);
+  }
+
+  @override
+  void dispose() {
+    widget.kit.removeListener(_follow);
+    _text.dispose();
+    super.dispose();
+  }
+
+  // The arrows and the keys change the angle from outside the field, and the
+  // field then says so. What is being typed is left alone: "40" on its way to
+  // "400" is not put back to the last angle that was a real one.
+  void _follow() {
+    final turn = widget.kit.brushTurn;
+    if (turn == _shown) return;
+    _shown = turn;
+    _text.text = '$turn';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final kit = widget.kit;
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      Text('TURN', key: const Key('turnLabel'), style: kitText(8, kTheme.onSurfaceDim)),
+      const SizedBox(width: 10),
+      kitButton('<', () => kit.turnBrush(-kTurnStep), fontSize: 8, key: const Key('turnLeft')),
+      const SizedBox(width: 8),
+      SizedBox(
+        width: 46,
+        child: kitField(_text, key: const Key('brushTurnField'),
+            wrong: parseTurn(_text.text) == null, onChanged: (typed) {
+          final turn = parseTurn(typed);
+          if (turn != null) {
+            _shown = turn;
+            kit.setBrushTurn(turn);
+          }
+          setState(() {});
+        }),
+      ),
+      const SizedBox(width: 8),
+      kitButton('>', () => kit.turnBrush(kTurnStep), fontSize: 8, key: const Key('turnRight')),
+    ]);
+  }
+}
 
 class KitScreen extends StatefulWidget {
   final KitController kit;
@@ -82,25 +146,49 @@ class _KitScreenState extends State<KitScreen> {
                 duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
           });
         }
-        return Scaffold(
-          backgroundColor: col(kTheme.bg),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _bar(context),
-              Expanded(
-                child: kit.fatal != null
-                    ? _message(kit.fatal!)
-                    : bank == null
-                        ? _message('LOADING THE GARDEN...')
-                        : _stage(bank),
-              ),
-              _statusLine(),
-              _shelf(bank),
-            ],
-          ),
+        // Q and E turn the piece on the brush. The garden has the keyboard
+        // (WASD moves it) and lets every other key go by; this is where
+        // those two are caught.
+        return Focus(
+          canRequestFocus: false,
+          skipTraversal: true,
+          onKeyEvent: _onKey,
+          child: _page(context, bank),
         );
       },
+    );
+  }
+
+  KeyEventResult _onKey(FocusNode node, KeyEvent e) {
+    if (e is KeyUpEvent || !kit.brushTurns) return KeyEventResult.ignored;
+    final by = e.logicalKey == LogicalKeyboardKey.keyQ
+        ? -kTurnStep
+        : e.logicalKey == LogicalKeyboardKey.keyE
+            ? kTurnStep
+            : 0;
+    if (by == 0) return KeyEventResult.ignored;
+    kit.turnBrush(by);
+    return KeyEventResult.handled;
+  }
+
+  Widget _page(BuildContext context, SpriteBank? bank) {
+    return Scaffold(
+      backgroundColor: col(kTheme.bg),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _bar(context),
+          Expanded(
+            child: kit.fatal != null
+                ? _message(kit.fatal!)
+                : bank == null
+                    ? _message('LOADING THE GARDEN...')
+                    : _stage(bank),
+          ),
+          _statusLine(),
+          _shelf(bank),
+        ],
+      ),
     );
   }
 
@@ -293,6 +381,9 @@ class _KitScreenState extends State<KitScreen> {
       color = kit.statusIsError ? kTheme.accent : kTheme.work;
     } else if (kit.erasing) {
       text = 'ERASER — click a tile to clear it.';
+    } else if (item != null && kit.brushTurns) {
+      text = '${item.name} (3D) — click a tile to place it turned ${kit.brushTurn}. '
+          'Click a copy again to take it off — or, with another TURN, to turn it.';
     } else if (item != null) {
       text = '${item.name} (${item.dimLabel}) — click a tile to place it, click it again to take it off.';
     } else {
@@ -301,11 +392,17 @@ class _KitScreenState extends State<KitScreen> {
     return Container(
       color: col(kTheme.bg),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-      child: Text(text,
-          key: const Key('statusLine'),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: kitText(8, color).copyWith(height: 1.5)),
+      child: Row(children: [
+        Expanded(
+          child: Text(text,
+              key: const Key('statusLine'),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: kitText(8, color).copyWith(height: 1.5)),
+        ),
+        // the angle of the piece on the brush — its own, not the garden's
+        if (kit.brushTurns) ...[const SizedBox(width: 14), TurnControl(kit)],
+      ]),
     );
   }
 

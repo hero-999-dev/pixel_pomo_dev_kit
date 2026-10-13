@@ -12,7 +12,7 @@ own engine (`App/flutter/lib/engine`, used as a package, not copied) and a
 `.vox` is converted by the game's own `vox_to_boxes.py`, so what stands in the
 kit's garden is what the game will draw.
 
-**Status: v0.1.3, released** in a private repository — [how to install it](INSTALL.md). Checked on Windows.
+**Status: v0.1.4** (v0.1.3 is the latest released) in a private repository — [how to install it](INSTALL.md). Checked on Windows.
 The macOS builds were made, tested and started without a window on GitHub's Macs; nobody has
 opened one on a Mac with a screen yet — see [What has and has not been tried](#what-has-and-has-not-been-tried).
 
@@ -159,6 +159,33 @@ for that one object (`BoxMesh.turn`, `App\flutter\lib\engine\garden_engine.dart`
 after the quarter turns; the leftover angle makes the model overhang its
 footprint a little.
 
+## Turning one thing
+
+There are three turns, and until v0.1.4 the kit offered only the two that turn
+everything:
+
+| | what turns | where |
+|---|---|---|
+| the garden | all of it, as a camera going round | right mouse button + drag |
+| a model | every copy of that model | the turn chosen in ADD, or in CHANGE |
+| **a placement** | that one copy, where it stands | **TURN**, right of the line under the garden |
+
+TURN is there whenever a 3D model is on the brush: two arrows a step of 15
+degrees each way (Q and E do the same), and the number itself, which can be
+typed, 0 to 360. Click a tile and the model goes down at that angle; the next
+one can go down at another. Clicking a placed copy with a different TURN set
+turns it where it stands; with the same TURN, it comes off, as before. Flowers
+and other sprites always face the camera, fences follow their neighbours and
+the ground has no front, so TURN is not offered for them.
+
+The angle is the garden's, not the kit's: a turned copy is stored as
+`house_x_cafe@45` on its tile (`Placeables.turned` / `Garden.turnAt` in the
+game), the game's own painter draws it, and it survives EXPAND, SHRINK and a
+restart. The game itself places everything square and writes no `@`. A mesh
+keeps one triangle list for each angle its copies stand at
+(`BoxMesh.batchFor(yaw, placed:)`), so two copies at two angles do not rebuild
+each other every frame.
+
 ## Details, CHANGE and the trash
 
 **Right-click** a tile on the shelf:
@@ -287,7 +314,7 @@ Tests:
 
 ```powershell
 cd DevKit;      python -m unittest discover -s tests -t .     # the launcher (171)
-cd DevKit\app;  flutter test                                   # the page (67)
+cd DevKit\app;  flutter test                                   # the page (77)
 cd DevKit;      python smoke.py                               # the built program, without its window
 ```
 

@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/gestures.dart' show kSecondaryButton;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -853,4 +854,135 @@ void main() {
     expect(kit.garden.tiles.length, 1);
     expect(launcher.saved, isEmpty);
   });
+
+  Future<KitController> withCafeOnTheBrush(WidgetTester tester, [FakeLauncher? launcher]) async {
+    final kit = await open(
+        tester, launcher ?? FakeLauncher(items: [cafe], state: jsonEncode({'category': 'outer'})));
+    await tester.scrollUntilVisible(find.byKey(const Key('item_house_x_cafe')), 200,
+        scrollable: find.byType(Scrollable).last);
+    await tester.tap(find.byKey(const Key('item_house_x_cafe')));
+    await tester.pump();
+    return kit;
+  }
+
+  kitTest('TURN is offered for a model and for nothing else', (tester) async {
+    final kit = await open(tester, FakeLauncher(items: [cafe]));
+    expect(find.byKey(const Key('brushTurnField')), findsNothing);
+    kit.pick(kit.palette.firstWhere((i) => i.id == 'gul~0'));
+    await tester.pump();
+    expect(find.byKey(const Key('brushTurnField')), findsNothing, reason: 'a flower faces you');
+    kit.pick(kit.palette.firstWhere((i) => i.id == 'fence_wood'));
+    await tester.pump();
+    expect(find.byKey(const Key('brushTurnField')), findsNothing);
+    kit.pick(kit.palette.firstWhere((i) => i.id == 'house_x_cafe'));
+    await tester.pump();
+    expect(find.byKey(const Key('brushTurnField')), findsOneWidget);
+    expect(textOf(tester, 'statusLine'), contains('turned 0'));
+    // the game's own building turns as well
+    kit.pick(kit.palette.firstWhere((i) => i.id == 'house_wood'));
+    await tester.pump();
+    expect(find.byKey(const Key('brushTurnField')), findsOneWidget);
+    kit.pickEraser();
+    await tester.pump();
+    expect(find.byKey(const Key('brushTurnField')), findsNothing);
+  });
+
+  kitTest('two things placed at two angles keep them: turning one does not turn the other',
+      (tester) async {
+    final launcher = FakeLauncher(items: [cafe], state: jsonEncode({'category': 'outer'}));
+    final kit = await withCafeOnTheBrush(tester, launcher);
+    garden(tester).onTapTile(3);
+    await tester.pump();
+    // the arrows: a step each
+    await tester.tap(find.byKey(const Key('turnRight')));
+    await tester.tap(find.byKey(const Key('turnRight')));
+    await tester.tap(find.byKey(const Key('turnRight')));
+    await tester.pump();
+    expect(kit.brushTurn, 45);
+    expect(tester.widget<TextField>(find.byKey(const Key('brushTurnField'))).controller!.text,
+        '45');
+    expect(textOf(tester, 'statusLine'), contains('turned 45'));
+    garden(tester).onTapTile(4);
+    await tester.pump();
+    expect(kit.garden.tiles, {3: 'house_x_cafe', 4: 'house_x_cafe@45'});
+    // the garden draws from what it is given: both angles reach it
+    expect([garden(tester).garden.turnAt(3), garden(tester).garden.turnAt(4)], [0, 45]);
+    // another thing, another angle — the first two stay as they are
+    kit.pick(kit.palette.firstWhere((i) => i.id == 'house_wood'));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('brushTurnField')), '200');
+    await tester.pump();
+    garden(tester).onTapTile(9);
+    await tester.pump(const Duration(seconds: 1));
+    expect(kit.garden.tiles,
+        {3: 'house_x_cafe', 4: 'house_x_cafe@45', 9: 'house_wood@200'});
+    // and that is what is kept for the next time the kit opens
+    expect(KitState.decode(launcher.saved.last).garden.tiles, kit.garden.tiles);
+  });
+
+  kitTest('a placed copy clicked with another TURN turns where it stands', (tester) async {
+    final kit = await withCafeOnTheBrush(tester);
+    garden(tester).onTapTile(3);
+    garden(tester).onTapTile(4);
+    await tester.tap(find.byKey(const Key('turnLeft')));
+    await tester.pump();
+    expect(kit.brushTurn, 345);
+    garden(tester).onTapTile(3);
+    await tester.pump();
+    expect(kit.garden.tiles, {3: 'house_x_cafe@345', 4: 'house_x_cafe'});
+    garden(tester).onTapTile(3); // the same TURN: off
+    await tester.pump();
+    expect(kit.garden.tiles, {4: 'house_x_cafe'});
+  });
+
+  kitTest('Q and E turn the piece, and the field follows', (tester) async {
+    final kit = await withCafeOnTheBrush(tester);
+    await tester.tap(find.byType(GardenView));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyE);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyE);
+    await tester.pump();
+    expect(kit.brushTurn, 30);
+    expect(tester.widget<TextField>(find.byKey(const Key('brushTurnField'))).controller!.text,
+        '30');
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyQ);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyQ);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyQ);
+    await tester.pump();
+    expect(kit.brushTurn, 345);
+    // with a flower on the brush the keys turn nothing
+    kit.pick(kit.palette.firstWhere((i) => i.id == 'gul~0'));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyE);
+    expect(kit.brushTurn, 345);
+  });
+
+  kitTest('a TURN that is not an angle is marked and changes nothing', (tester) async {
+    final kit = await withCafeOnTheBrush(tester);
+    await tester.enterText(find.byKey(const Key('brushTurnField')), '90');
+    await tester.pump();
+    expect(kit.brushTurn, 90);
+    for (final wrong in ['400', 'abc', '-5', '']) {
+      await tester.enterText(find.byKey(const Key('brushTurnField')), wrong);
+      await tester.pump();
+      expect(kit.brushTurn, 90, reason: wrong);
+      // what was typed is left in the field, not put back
+      expect(tester.widget<TextField>(find.byKey(const Key('brushTurnField'))).controller!.text,
+          wrong);
+    }
+    await tester.enterText(find.byKey(const Key('brushTurnField')), '360');
+    await tester.pump();
+    expect(kit.brushTurn, 0);
+  });
+
+  kitTest('a garden saved with turned things opens with them turned', (tester) async {
+    final kit = await open(
+        tester,
+        FakeLauncher(items: [cafe], state: jsonEncode({
+          'garden': 'cols:6\nrows:12\n4:house_x_cafe@45\n5:house_x_gone@90\n6:house_wood@270',
+        })));
+    expect(kit.garden.tiles, {4: 'house_x_cafe@45', 6: 'house_wood@270'});
+    expect(garden(tester).garden.turnAt(4), 45);
+  });
 }
+

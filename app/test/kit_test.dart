@@ -347,6 +347,57 @@ void main() {
       expect(brush(const Garden(), 999, rose).tiles, isEmpty);
     });
 
+    // an added model, known to the game's rules as a building for this test
+    KitItem theCafe() {
+      final added = file('house_x_cafe', ImportKind.vox);
+      registerImported([added]);
+      return itemFor(added)!;
+    }
+
+    test('a model goes down at the angle asked for, and each copy keeps its own', () {
+      final cafe = theCafe();
+      var g = brush(const Garden(), 3, cafe, turn: 45);
+      g = brush(g, 4, cafe, turn: 200);
+      g = brush(g, 5, cafe);
+      expect(g.tiles, {3: 'house_x_cafe@45', 4: 'house_x_cafe@200', 5: 'house_x_cafe'});
+      expect([g.turnAt(3), g.turnAt(4), g.turnAt(5)], [45, 200, 0]);
+      // what stands there is still the cafe, whichever way it faces
+      expect([g.propAt(3), g.propAt(4), g.propAt(5)], List.filled(3, 'house_x_cafe'));
+    });
+
+    test('brushing a copy at another angle turns that copy; at its own, takes it off', () {
+      final cafe = theCafe();
+      var g = brush(brush(const Garden(), 3, cafe, turn: 45), 4, cafe, turn: 45);
+      g = brush(g, 3, cafe, turn: 90);
+      expect(g.tiles, {3: 'house_x_cafe@90', 4: 'house_x_cafe@45'}, reason: 'only tile 3 turned');
+      g = brush(g, 3, cafe, turn: 90);
+      expect(g.tiles, {4: 'house_x_cafe@45'});
+      // a whole turn is the angle it already has
+      g = brush(g, 4, cafe, turn: 405);
+      expect(g.tiles, isEmpty);
+    });
+
+    test('what cannot be turned ignores the angle', () {
+      final cafe = theCafe();
+      expect(turnsWherePlaced(cafe), true);
+      expect([turnsWherePlaced(rose), turnsWherePlaced(road), turnsWherePlaced(fence)],
+          [false, false, false]);
+      var g = brush(const Garden(), 5, rose, turn: 90);
+      expect(g.tiles, {5: 'gul~0'});
+      // and the same flower at "another angle" is still the same flower: off
+      g = brush(g, 5, rose, turn: 180);
+      expect(g.tiles, isEmpty);
+      expect(brush(const Garden(), 5, fence, turn: 90).tiles, {5: 'fence_wood'});
+    });
+
+    test('removing a file takes its turned copies too, and leaves the others turned', () {
+      final g = const Garden(tiles: {1: 'house_x_cafe@45', 2: 'house_wood@90', 3: 'house_x_cafe'});
+      final known = {for (final i in builtInItems()) i.id};
+      expect(dropUnknown(g, known).tiles, {2: 'house_wood@90'});
+      final kept = dropUnknown(g, {...known, 'house_x_cafe'});
+      expect(identical(kept, g), true);
+    });
+
     test('removing a file takes what it left in the garden with it', () {
       final g = const Garden(tiles: {
         0: 'gul~0',

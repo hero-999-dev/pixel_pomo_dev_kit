@@ -383,19 +383,33 @@ Garden shrink(Garden g) {
   return Garden(cols: nc, rows: nr, tiles: kept);
 }
 
-/// Brush [item] onto tile [index]. Brushing a tile with what it already holds
-/// takes it off again; otherwise the game's own layering rules decide
-/// ([Garden.plant]) — so a flower is refused on a path here exactly as it is in
-/// the game, and the garden comes back unchanged.
-Garden brush(Garden g, int index, KitItem item) {
+/// Can [item] be turned where it stands? A model can: it is geometry, and the
+/// garden keeps an angle for each copy of it. A sprite always faces the
+/// camera, a fence follows its neighbours, and the ground has no front.
+bool turnsWherePlaced(KitItem item) => Placeables.isHouse(item.id);
+
+/// How far one press of the TURN arrows goes, in degrees.
+const int kTurnStep = 15;
+
+/// Brush [item] onto tile [index], turned [turn] degrees if it is a model.
+/// Brushing a tile with what it already holds takes it off again — unless it
+/// is a model asked for at another angle, which turns that one copy where it
+/// stands. Otherwise the game's own layering rules decide ([Garden.plant]) —
+/// so a flower is refused on a path here exactly as it is in the game, and
+/// the garden comes back unchanged.
+Garden brush(Garden g, int index, KitItem item, {int turn = 0}) {
   if (!g.isValidIndex(index)) return g;
   final (road, prop) = switch (g.tiles[index]) {
     final value? => Placeables.split(value),
     null => (null, null),
   };
+  final turns = turnsWherePlaced(item);
   if (item.isGround && road == item.id) return _put(g, index, null, prop);
-  if (!item.isGround && prop == item.id) return _put(g, index, road, null);
-  return g.plant(index, item.id);
+  if (!item.isGround && prop == item.id) {
+    if (turns && g.turnAt(index) != turn % 360) return g.plant(index, item.id, turn: turn);
+    return _put(g, index, road, null);
+  }
+  return g.plant(index, item.id, turn: turns ? turn : 0);
 }
 
 Garden _put(Garden g, int index, String? road, String? prop) {
@@ -414,7 +428,8 @@ Garden dropUnknown(Garden g, Set<String> known) {
   g.tiles.forEach((index, value) {
     final parts = [
       for (final part in value.split('+'))
-        if (known.contains(part)) part
+        // a model turned where it stands is stored as `id@degrees`
+        if (known.contains(Placeables.unturned(part))) part
     ];
     if (parts.length != value.split('+').length) changed = true;
     if (parts.isNotEmpty) tiles[index] = parts.join('+');

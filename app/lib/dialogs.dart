@@ -86,7 +86,7 @@ Widget _choices<T>(List<(T, String)> options, T chosen, void Function(T) onPick,
             on: value == chosen, fontSize: 8, key: Key('$keyPrefix$text')),
     ]);
 
-Widget _field(TextEditingController controller,
+Widget kitField(TextEditingController controller,
         {required Key key, void Function(String)? onChanged, bool wrong = false}) =>
     TextField(
       key: key,
@@ -105,7 +105,7 @@ Widget _field(TextEditingController controller,
     );
 
 Widget _nameField(TextEditingController controller) =>
-    _field(controller, key: const Key('nameField'));
+    kitField(controller, key: const Key('nameField'));
 
 final _categoryChoices = [for (final c in KitCategory.values) (c, c.label)];
 
@@ -588,7 +588,7 @@ class _VoxDialogState extends State<VoxDialog> {
               const SizedBox(width: 8),
               SizedBox(
                   width: 64,
-                  child: _field(_wide,
+                  child: kitField(_wide,
                       key: const Key('fitWide'),
                       wrong: _wideTiles == null,
                       onChanged: (_) => setState(() {}))),
@@ -597,7 +597,7 @@ class _VoxDialogState extends State<VoxDialog> {
               const SizedBox(width: 8),
               SizedBox(
                   width: 64,
-                  child: _field(_long,
+                  child: kitField(_long,
                       key: const Key('fitLong'),
                       wrong: _longTiles == null,
                       onChanged: (_) => setState(() {}))),
@@ -623,7 +623,7 @@ class _VoxDialogState extends State<VoxDialog> {
           Row(children: [
             SizedBox(
                 width: 64,
-                child: _field(_turnText,
+                child: kitField(_turnText,
                     key: const Key('turnField'),
                     wrong: turn == null,
                     onChanged: (_) => setState(() {}))),
@@ -1231,8 +1231,10 @@ Future<void> showGuide(BuildContext context, KitController kit) {
           'ADD > ADD 2D SPRITE or ADD 3D VOX FILE, and pick your file. A model is shown as you choose its size and its turn. It lands on the shelf you choose, marked NEW.'),
       step('3  PLACE',
           'Pick it on the shelf at the bottom, then click a tile in the garden. Click the same tile again to take it off; ERASER clears a tile. Every object of the game is on the shelves too, sorted as the market sorts them.'),
+      step('TURN ONE THING',
+          'Pick a 3D model, then set TURN — at the right of the line under the garden: the arrows, the Q and E keys, or a number from 0 to 360 — and click a tile. Each copy keeps the angle it was placed at. Click a placed copy with another TURN set and it turns where it stands; with the same TURN, it comes off.'),
       step('4  LOOK',
-          'VIEW switches between the browser build\'s wide look and a phone\'s upright screen. Hold the right mouse button and drag to turn the garden, scroll to zoom, drag or use WASD to move. SHRINK and EXPAND resize the plot the way the game does.'),
+          'VIEW switches between the browser build\'s wide look and a phone\'s upright screen. Hold the right mouse button and drag to turn the garden — the whole of it, as a camera would — scroll to zoom, drag or use WASD to move. SHRINK and EXPAND resize the plot the way the game does.'),
       step('5  CHANGE, OR THROW AWAY',
           'Right-click anything on the shelf for its details. For something you added they are the choices you made, with CHANGE under them to make them again — its size, its turn, its name, its shelf — and MOVE TO TRASH.\nNothing is deleted by that: TRASH, top right, puts it back or deletes it for good.'),
       step('2D AND 3D',
