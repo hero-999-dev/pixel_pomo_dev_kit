@@ -383,12 +383,17 @@ def _setup_window():
         return None
 
 
-def _run_with_permission(command, cwd=None, window=None, limit=PERMITTED_LIMIT):
+def _run_with_permission(command, cwd=None, window=None, limit=PERMITTED_LIMIT,
+                         verb="runas"):
     """Start `command` through Windows' permission question and wait for it.
     Returns its exit code; None when the question was answered "no"; raises
     TimeoutError when it was allowed and then did not finish in `limit`
     seconds. How long the QUESTION stays unanswered is not limited here:
-    that is the artist reading it."""
+    that is the artist reading it.
+
+    `verb` is "runas" - with permission. "open" starts the same command the
+    same way without asking, which is how everything here except the
+    question itself is tried on a machine with nobody to answer it."""
     import ctypes
     from ctypes import wintypes
 
@@ -416,7 +421,7 @@ def _run_with_permission(command, cwd=None, window=None, limit=PERMITTED_LIMIT):
     info.cbSize = ctypes.sizeof(Info)
     info.fMask = 0x40 | 0x100   # keep the process handle; finish before returning
     info.hwnd = window
-    info.lpVerb = "runas"
+    info.lpVerb = verb
     info.lpFile = command[0]
     info.lpParameters = subprocess.list2cmdline(command[1:])
     info.lpDirectory = str(cwd) if cwd else None

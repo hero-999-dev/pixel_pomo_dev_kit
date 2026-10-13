@@ -345,9 +345,15 @@ brings the first to the front, closing it ends the program within a few
 seconds, sprites / grounds / forest sprites are added and placed, and
 everything is still there after a restart.
 
+**Try what is released, on the path that matters.** v0.1.2 was tried in its window from the
+build made here, and only its install into an ordinary folder was repeated with the released
+file. The released file was built with another Python, and on the Program Files path — the
+default — it never answered. A release is checked by downloading it and pressing INSTALL
+with the folder it suggests.
+
 Not tried:
 
-- **Windows' permission question, answered.** Installing into the suggested `C:\Program Files\PixelPomoDevKit` needs someone to say Yes, and the sessions this was built in have nobody to: there the question is never answered at all. That is how v0.1.1's stuck `INSTALLING...` was found again, and how the wait was tried — the bar, the words, where to look, CANCEL ending the program. What follows a Yes was tried in pieces with the packaged program (`--open-folder` makes a folder and opens it to an account; the setup then copies into it), never as one run through the question. `%LOCALAPPDATA%\PixelPomoDevKit\setup.log` says how far an install got.
+- **Windows' permission question itself.** Installing into the suggested `C:\Program Files\PixelPomoDevKit` needs someone to say Yes, and the sessions this was built in have nobody to: there the question is never answered. Everything around it was run with the program exactly as released — the setup answers for Program Files and shows that it is waiting for Windows; CANCEL ends it; started the way the setup starts it but without asking (`_run_with_permission(verb="open")`), the released program makes the folder, opens it to the account and reports back in about three seconds; the setup then copies into a folder it can write. Whether the question now opens in front of the window has not been seen. `%LOCALAPPDATA%\PixelPomoDevKit\setup.log` says how far an install got.
 - **The windows on a desktop, by eye.** The sessions this was built in have no screen: both windows were created, driven and closed, and their contents captured, but their frames, title-bar icons and taskbar buttons have not been looked at by anyone here.
 - **The desktop shortcut's look.** The shortcut is made and points at the program; its icon on a real Desktop has not been seen.
 - **The folder BROWSE button** in the setup window: it opens the system's folder dialog, which a script cannot answer. The typed path was used instead.
