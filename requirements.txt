@@ -1,0 +1,6 @@
+# What the launcher needs to run from source.
+pywebview>=6.2
+# The certificate store a frozen Mac build has none of (updater._open).
+certifi
+# ...and to be packaged (build.py).
+pyinstaller>=6.0

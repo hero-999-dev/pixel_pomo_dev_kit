@@ -1,0 +1,88 @@
+PIXEL POMO DEV KIT - Windows
+============================
+
+See your own sprite or voxel model standing in Pixel Pomo's garden.
+
+
+INSTALL IT
+
+  Double-click PixelPomoDevKit.exe.
+
+  The first time, Windows says "Windows protected your PC", because the
+  program is not signed. Click "More info", then "Run anyway".
+
+  A setup window opens and asks where the Dev Kit should live. It suggests
+
+      C:\Program Files\PixelPomoDevKit
+
+  - change it, or BROWSE to another folder, if you want it elsewhere - and
+  offers a shortcut on the Desktop. Press INSTALL, then OPEN THE DEV KIT.
+
+  Program Files is where Windows keeps programs, so Windows asks once
+  whether this one may be put there ("Do you want to allow this app to make
+  changes to your device?"). Say Yes. A folder of your own - D:\Tools, the
+  Desktop - is not asked about.
+
+  From then on, start it from the Desktop shortcut. The file you downloaded
+  is no longer needed.
+
+  Nothing else needs installing on Windows 11. (On an older Windows 10
+  without the "WebView2" part of Edge, the kit opens in your browser instead
+  and works the same there.)
+
+
+USE IT
+
+  1. ADD > ADD 2D SPRITE     a .png from the Art Kit ("Export engine sprite")
+     ADD > ADD 3D VOX FILE   a .vox saved from MagicaVoxel - the model is
+                             shown as you choose its size and its turn
+  2. Pick it on the shelf at the bottom. It is marked NEW.
+  3. Click a tile in the garden. Click the tile again to take it off.
+
+  Right-click anything on the shelf for its details. For something you
+  added they are the choices you made, with CHANGE to make them again, and
+  MOVE TO TRASH. TRASH, top right, puts a thing back or deletes it for good -
+  nothing is deleted anywhere else.
+
+  Right mouse button + drag turns the garden. The wheel zooms.
+  VIEW switches between the browser look and a phone's screen.
+  GUIDE, next to ADD, has the rest.
+
+
+A .VOX THAT COMES OUT RIGHT
+
+  At its original size, 16 voxels are one garden tile. FIT TO TILES makes it
+  as large as goes into the footprint you type - 2 wide, 2 long - keeping
+  its shape.
+  Build it with its front toward MagicaVoxel's -y, or turn it by any angle
+  from 0 to 360 when you add it.
+  One model becomes one object; a file with several asks which.
+  Only colours come across. Glass, glow and metal are ignored.
+
+
+YOUR FILES
+
+  Everything you add is kept, each file under its own name, in
+
+      C:\Program Files\PixelPomoDevKit\Files\     (or the folder you chose)
+
+  Click the version number, top left in the kit, to see where everything is
+  and open the folders.
+
+
+UPDATES
+
+  UPDATE, top right, says when a newer version is out. Click it: the kit
+  downloads it, closes, and opens again as the new version.
+
+  An update replaces the program only. The Files folder - what you added,
+  the trash, the garden as you left it - is never touched.
+
+  A newer PixelPomoDevKit.exe that you downloaded yourself does the same:
+  double-click it and it offers to update the installed kit, files kept.
+
+
+IF IT DOES NOT OPEN
+
+  Look at devkit.log in the Files folder; it says what went wrong.
+  Starting the kit a second time brings the one already running to the front.

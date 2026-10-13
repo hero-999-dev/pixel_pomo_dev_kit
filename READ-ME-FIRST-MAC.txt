@@ -1,0 +1,75 @@
+PIXEL POMO DEV KIT - macOS
+==========================
+
+See your own sprite or voxel model standing in Pixel Pomo's garden.
+
+NOTE: this Mac build has not been tried on a Mac yet. If a step below does
+not go as written, that is worth reporting exactly as it happened.
+
+
+INSTALL IT - ONE LINE, NO WARNINGS
+
+  Open Terminal (Cmd + Space, type "Terminal", Enter), paste this line and
+  press Enter:
+
+    curl -fsSL https://github.com/hero-999-dev/pixel_pomo_dev_kit/releases/latest/download/install-mac.sh | sh
+
+  It picks the right build for your Mac (Apple Silicon or Intel), fetches it
+  and opens the setup. macOS shows no "cannot be opened" warning, because a
+  file fetched this way is not marked as a browser download.
+
+  The setup asks where the Dev Kit should live and suggests
+
+      /Applications/PixelPomoDevKit
+
+  Press INSTALL. The kit opens from there, and that folder is where it stays.
+
+
+IF YOU DOWNLOADED THE ZIP IN A BROWSER INSTEAD
+
+  The app is not signed, so macOS blocks a browser download the first time.
+    "Chip: Apple M..."      ->  PixelPomoDevKit-macos-apple-silicon.zip
+    "Processor: Intel..."   ->  PixelPomoDevKit-macos-intel.zip
+  Unzip it, then in Terminal:
+
+      xattr -dr com.apple.quarantine ~/Downloads/PixelPomoDevKit.app
+      open ~/Downloads/PixelPomoDevKit.app
+
+  and the same setup opens. (Without Terminal: double-click, click Done on
+  the warning, then System Settings > Privacy & Security > Open Anyway.)
+
+
+USE IT
+
+  1. ADD > ADD 2D SPRITE     a .png from the Art Kit ("Export engine sprite")
+     ADD > ADD 3D VOX FILE   a .vox saved from MagicaVoxel - the model is
+                             shown as you choose its size and its turn
+  2. Pick it on the shelf at the bottom. It is marked NEW.
+  3. Click a tile in the garden. Click the tile again to take it off.
+
+  Right-click (two-finger click) anything on the shelf for its details; for
+  something you added: CHANGE and MOVE TO TRASH. TRASH, top right, puts a
+  thing back or deletes it for good.
+
+  Right mouse button + drag turns the garden. Scrolling zooms. VIEW switches
+  between the browser look and a phone's screen. GUIDE has the rest.
+
+
+YOUR FILES
+
+  Everything you add is kept, each file under its own name, in
+
+      /Applications/PixelPomoDevKit/Files/      (or the folder you chose)
+
+  beside the app, not inside it - and not in Documents, so macOS never asks
+  for permission. Click the version number, top left in the kit, to see the
+  folders and open them.
+
+
+UPDATES
+
+  UPDATE, top right, says when a newer version is out. Click it: the kit
+  downloads it, closes, and opens again as the new version. It replaces the
+  app only; the Files folder is not touched.
+
+  devkit.log in the Files folder says what went wrong if the kit misbehaves.

@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+build/
+dist/
+# PixelPomoDevKit.spec is the build recipe, not PyInstaller spew - keep it
+*.spec
+!PixelPomoDevKit.spec
+# Written at the folder root by `python -m dev_kit`: the artist's files when
+# the kit runs from source
+_data/
+# Copied in from the game by sync_assets.py before every build
+app/assets/

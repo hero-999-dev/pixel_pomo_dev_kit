@@ -1,0 +1,37 @@
+name: pixel_pomo_dev_kit
+description: "Pixel Pomo Dev Kit - the garden, with an artist's own sprites and voxel models in it."
+publish_to: 'none'
+version: 0.1.1+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # The game itself. The kit draws with the game's own engine (garden_engine,
+  # garden_view) rather than a copy of it, so what an artist sees here is what
+  # the game will draw. DevKit and App therefore have to stay siblings.
+  pixel_pomo:
+    path: ../../App/flutter
+  http: ^1.2.0
+  web: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  # Not kept here: `sync_assets.py` copies these in from the game before every
+  # build, so the kit can never show a sprite the game no longer ships. The
+  # engine loads them by these exact keys.
+  assets:
+    - assets/objects/
+    - assets/meshes/
+    - assets/icon/app_icon.png
+  fonts:
+    - family: PressStart2P
+      fonts:
+        - asset: assets/fonts/PressStart2P-Regular.ttf

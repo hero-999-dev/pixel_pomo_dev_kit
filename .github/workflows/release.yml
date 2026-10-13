@@ -1,0 +1,140 @@
+# Build the Dev Kit for Windows AND macOS, and publish both to one release.
+#
+# NOT YET RUN. Written beside the Art Kit's release workflow, which has the
+# same shape and works; the differences (a Flutter build, a wider sparse
+# checkout of the game) have not met a runner. Expect the first run to need a
+# fix or two, and try it with workflow_dispatch before pushing a tag.
+#
+# Like the Art Kit's, it checks out the game as a SECOND repository: the page
+# is compiled against the game's engine and the program bundles the game's
+# voxel converter. If the game repo is private the built-in token cannot read
+# it; put a read-only PAT in the secret APP_REPO_TOKEN.
+name: Release Dev Kit
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish (e.g. v0.1.0)'
+        required: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: PixelPomoDevKit-windows
+          # Two Mac builds: PyInstaller cannot cross-compile between
+          # architectures, so an Intel Mac needs a binary from an Intel runner.
+          - os: macos-latest
+            artifact: PixelPomoDevKit-macos-apple-silicon
+          - os: macos-15-intel
+            artifact: PixelPomoDevKit-macos-intel
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    steps:
+      # The kit resolves the game RELATIVE to itself (DevKit/ -> ../App), so
+      # the two checkouts have to land as siblings under one parent.
+      - name: Check out the dev kit
+        uses: actions/checkout@v4
+        with:
+          path: DevKit
+
+      # SPARSE, as in the Art Kit's workflow and for the same reason: a full
+      # checkout of the game fails on Windows on its long screenshot names.
+      - name: Check out the game (engine, art, converters)
+        uses: actions/checkout@v4
+        with:
+          repository: hero-999-dev/pixel_pomo
+          token: ${{ secrets.APP_REPO_TOKEN || github.token }}
+          path: App
+          sparse-checkout: |
+            flutter/lib
+            flutter/assets
+            flutter/test_assets
+            flutter/tools
+            flutter/pubspec.yaml
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # the version this was developed against; the game's own CI pins its own
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.2'
+          channel: stable
+
+      - name: Install
+        run: python -m pip install --upgrade pip -r DevKit/requirements.txt
+
+      # The page first: the Dart tests need the game's art copied in.
+      - name: Build the page
+        working-directory: DevKit
+        run: python build.py --page
+
+      - name: Tests (launcher)
+        working-directory: DevKit
+        run: python -m unittest discover -s tests -t .
+
+      - name: Tests (page)
+        working-directory: DevKit/app
+        run: flutter test
+
+      - name: Build the program
+        working-directory: DevKit
+        run: python -m PyInstaller PixelPomoDevKit.spec --noconfirm --clean
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        working-directory: DevKit
+        run: |
+          mkdir stage
+          copy dist\PixelPomoDevKit.exe stage\
+          copy READ-ME-FIRST.txt stage\
+          copy assets\icon.png stage\
+          powershell Compress-Archive -Path stage\* -DestinationPath ${{ matrix.artifact }}.zip -Force
+
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        working-directory: DevKit
+        run: |
+          mkdir stage
+          cp -R dist/PixelPomoDevKit.app stage/
+          cp READ-ME-FIRST-MAC.txt stage/
+          cp assets/icon.png stage/
+          cd stage && zip -qry ../${{ matrix.artifact }}.zip .
+
+      # Straight to the release, not via upload-artifact - see the Art Kit's
+      # workflow for the storage quota that taught this.
+      - name: Publish to the release
+        shell: bash
+        working-directory: DevKit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --title "Pixel Pomo Dev Kit $TAG" --generate-notes \
+            || echo "release already exists — uploading into it"
+          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
+            "${{ matrix.artifact }}.zip"
+
+      # The Mac's one-line install (READ-ME-FIRST-MAC.txt) fetches this from
+      # the release itself, so it has to be an asset. Once, from one job.
+      - name: Publish the Mac install script
+        if: matrix.artifact == 'PixelPomoDevKit-macos-apple-silicon'
+        shell: bash
+        working-directory: DevKit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          sh -n install-mac.sh
+          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber install-mac.sh
