@@ -1,0 +1,445 @@
+diff --git a/flutter/assets/objects/flower_chamomile.png b/flutter/assets/objects/flower_chamomile.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..4683cda4ed390ee99ea09014f617ee1bcd34c2d6
+GIT binary patch
+literal 1366
+zcmeAS@N?(olHy`uVBq!ia0y~yU<5K5893O0R7}x|GzJD%Sx*<okcwMx?<o2)2a2>l
+zOq5@;irYc)pm10~^WhDgVF%<4au!R;u(==N^DsEEiSdqS@vmpK^+l!kOYZ%BqSLM7
+zIf<5N*1p%>PYpg*Gz&4PFgjoo3=9rT3=AqLR0^ZtN2cZb>nrxlSGoQF&&UDvE$M&-
+zsKo)K4TW)l>A(H{`}41Qp8x;xo6y<wuX9aa0_~b__y5gzc93f7f@`}DyuE3!e{l)-
+zjd@>wrth~eb)c>VK+}HAJ2261#YDefOqcKbi?6U<{Qv)3{#ic%T@|Qq)oRuywT-vr
+zrxg4<X@7!|f&0lH28IUKqB;hK15B3o3=9d4bL1HqHaMK)XJCj>cn%Cuoe7_r85qP)
+z`~;?4sB&O@0~LbY7NGzl#X#}fzzP#?n5tLs`_IdqvfCNAp6AyGuz?kU6jBcq%n{!)
+zXMX7NzkkC0r(fK{DEs#xC}&X@9LVAp|M2nkLaW?{AcjZAQ|{N-q9jEJkac)O@VF*n
+zDfgVX2fP3JmfmVu@;qNZ;Mf19=k0A4;L$>+RKcPKP)snGd}mrtiwsgC<KV`g@r`xM
+h0WuwkTbrLqgMIh26PuQto3jq2%G1@)Wt~$(696d+*!%zh
+
+literal 0
+HcmV?d00001
+
+diff --git a/flutter/assets/objects/flower_papatya.png b/flutter/assets/objects/flower_papatya.png
+index 4683cda4ed390ee99ea09014f617ee1bcd34c2d6..b392de0b70a0a460729424fd3ebffb14c21d1726 100644
+GIT binary patch
+literal 1430
+zcmeAS@N?(olHy`uVBq!ia0y~yU<5K5K5(!B$@kNDon~NQjrDYK45_&F_Rd0HCqt38
+zi_0aMT9sOOBN_}C+jt`cdk-y;Xl6}djB(Dp{lDhqRg*pUly~cBz1<LBJLx#D00V;p
+z&`2SYsINO3`k$}PT$OEW-@pQNhyxHakk2^4^ncd1RrU2>-2T^@0UgB905Xq*d<N^h
+z;>JtzES~H<AcIH+&)I=G9{d4mn<Eb-8a^`v$$~nNz&ZYgNJfwN1>gUMSiSsj4-%p-
+zsJM`PZk70ss!P&xppc+0xXfhmt67NQ1e?M?M?vZu4K(d8(*wtex41+09(dVsT;G7|
+z<})xXIL*pL17lyvH*AS}P;y|E_=;b@Z#sZ%09m6zK4bGXyL`K;m#Y{V0=OMshuo(@
+zLU~czsJ}h=<r3y8`x+M0!h#v14X<v-ZofGB-(PT<0}2hQfd$tu$+s{#d}}uFuA-Wu
+uFoReYXv!bi&_HY)g0wk+2+R^p?Jf6G$IC2MB6XKR3Orr?T-G@yGywn#6^(BI
+
+literal 1366
+zcmeAS@N?(olHy`uVBq!ia0y~yU<5K5893O0R7}x|GzJD%Sx*<okcwMx?<o2)2a2>l
+zOq5@;irYc)pm10~^WhDgVF%<4au!R;u(==N^DsEEiSdqS@vmpK^+l!kOYZ%BqSLM7
+zIf<5N*1p%>PYpg*Gz&4PFgjoo3=9rT3=AqLR0^ZtN2cZb>nrxlSGoQF&&UDvE$M&-
+zsKo)K4TW)l>A(H{`}41Qp8x;xo6y<wuX9aa0_~b__y5gzc93f7f@`}DyuE3!e{l)-
+zjd@>wrth~eb)c>VK+}HAJ2261#YDefOqcKbi?6U<{Qv)3{#ic%T@|Qq)oRuywT-vr
+zrxg4<X@7!|f&0lH28IUKqB;hK15B3o3=9d4bL1HqHaMK)XJCj>cn%Cuoe7_r85qP)
+z`~;?4sB&O@0~LbY7NGzl#X#}fzzP#?n5tLs`_IdqvfCNAp6AyGuz?kU6jBcq%n{!)
+zXMX7NzkkC0r(fK{DEs#xC}&X@9LVAp|M2nkLaW?{AcjZAQ|{N-q9jEJkac)O@VF*n
+zDfgVX2fP3JmfmVu@;qNZ;Mf19=k0A4;L$>+RKcPKP)snGd}mrtiwsgC<KV`g@r`xM
+h0WuwkTbrLqgMIh26PuQto3jq2%G1@)Wt~$(696d+*!%zh
+
+diff --git a/flutter/assets/objects/flower_papatya_0.png b/flutter/assets/objects/flower_papatya_0.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..b392de0b70a0a460729424fd3ebffb14c21d1726
+GIT binary patch
+literal 1430
+zcmeAS@N?(olHy`uVBq!ia0y~yU<5K5K5(!B$@kNDon~NQjrDYK45_&F_Rd0HCqt38
+zi_0aMT9sOOBN_}C+jt`cdk-y;Xl6}djB(Dp{lDhqRg*pUly~cBz1<LBJLx#D00V;p
+z&`2SYsINO3`k$}PT$OEW-@pQNhyxHakk2^4^ncd1RrU2>-2T^@0UgB905Xq*d<N^h
+z;>JtzES~H<AcIH+&)I=G9{d4mn<Eb-8a^`v$$~nNz&ZYgNJfwN1>gUMSiSsj4-%p-
+zsJM`PZk70ss!P&xppc+0xXfhmt67NQ1e?M?M?vZu4K(d8(*wtex41+09(dVsT;G7|
+z<})xXIL*pL17lyvH*AS}P;y|E_=;b@Z#sZ%09m6zK4bGXyL`K;m#Y{V0=OMshuo(@
+zLU~czsJ}h=<r3y8`x+M0!h#v14X<v-ZofGB-(PT<0}2hQfd$tu$+s{#d}}uFuA-Wu
+uFoReYXv!bi&_HY)g0wk+2+R^p?Jf6G$IC2MB6XKR3Orr?T-G@yGywn#6^(BI
+
+literal 0
+HcmV?d00001
+
+diff --git a/flutter/assets/objects/flower_papatya_1.png b/flutter/assets/objects/flower_papatya_1.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..df60c48df610965f226af032cb2b075c22287a65
+GIT binary patch
+literal 1406
+zcmeAS@N?(olHy`uVBq!ia0y~yU<5K5K5(!B$@kNDon~NQb@g;{45_&F_RhxMLk<FM
+zfyYH0U0MVbB}E!y7&&DFx}ufJtn(PS6l6MY-mIO!<>SkD^7}t5^IREwez*VAbVp8x
+zNel`Ygb)LR0?;Z{DyUz+;46a?$OTM5tU#Ed!oc7FREk7>V*I~tZSf067m#KaAa)o4
+zh6e*f1JG^|b?gVj>iw^J_s!Rr06L@r<QNVj7$9{xKtuhChs+EK^}m^MC?H?hVZHo^
+zZRZw-|82-St@`DSy@diF1H(7=24;qazl;wUfR-{?FfiPZXBZ^Hm_Gd%_LcdRT)}^f
+zmN=1y7w5Ovf8+;+JIUZT^8rSN1OFHb7#KF#GsrM7yy0hHXJCK|-({M>>+!9-&fzNK
+z2{x7AzC@;0!mhZGagn)V-}|NaUzYOheQ~~@Dd6w-^K}=01FfbqXo$0a@P=REH*?p&
+ze^>1vy!ySI8RQGn0KsJN*S^t>@#H^-)%6UEnV;A*flC+C?7*-3#nu<{8-6kVY**M>
+zZ!d3vUoj3@0gyPzWvGm;oE~Nli}%0zTjK~)KwMcOZwOS#&%o5c&cJwpxq;yUqXWYS
+bh6@?-tJCuL?r|0M2N~t*>gTe~DWM4fiKf*Z
+
+literal 0
+HcmV?d00001
+
+diff --git a/flutter/lib/engine/garden_engine.dart b/flutter/lib/engine/garden_engine.dart
+index 99ee078..c2a8eec 100644
+--- a/flutter/lib/engine/garden_engine.dart
++++ b/flutter/lib/engine/garden_engine.dart
+@@ -597,20 +597,98 @@ class BoxMesh {
+   /// checked against the ones we hand-write. The painter needs only [boxes].
+   final double tiles;
+   final List<MeshBox> boxes;
+-  const BoxMesh(this.id, this.tiles, this.boxes);
++
++  /// How far the whole object is turned about its own vertical axis, in
++  /// radians — the file's optional `turn`, in degrees. Boxes are axis-aligned,
++  /// so a quarter turn is written into the boxes themselves by the converter;
++  /// this carries any angle that is not one, and costs nothing: a turned mesh
++  /// is the same mesh seen by a camera that much further round.
++  final double turn;
++  BoxMesh(this.id, this.tiles, this.boxes, {this.turn = 0});
+ 
+   factory BoxMesh.fromJson(Map<String, dynamic> j) {
+     final boxes = [
+       for (final b in (j['boxes'] as List)) MeshBox.fromJson(b as Map<String, dynamic>)
+     ];
+     if (boxes.isEmpty) throw const FormatException('a mesh with no boxes draws nothing');
+-    return BoxMesh(j['id'] as String, (j['tiles'] as num).toDouble(), boxes);
++    return BoxMesh(j['id'] as String, (j['tiles'] as num).toDouble(), boxes,
++        turn: ((j['turn'] as num?)?.toDouble() ?? 0) * math.pi / 180);
+   }
+ 
+   /// The tallest point of the object, in tiles — used for the off-screen cull,
+   /// the same way a billboard's height is.
+-  double get height =>
++  late final double height =
+       boxes.map((b) => b.z + b.h).reduce((a, b) => a > b ? a : b);
++
++  double? _batchYaw;
++  ui.Vertices? _batch;
++
++  /// Every face the camera can see at [yaw], as ONE triangle list — see
++  /// [meshTriangles]. Built when the yaw changes and kept until it changes
++  /// again, so a garden that is not being twisted pays one draw call a
++  /// building and no geometry at all.
++  ui.Vertices batchFor(double yaw) {
++    final kept = _batch;
++    if (kept != null && _batchYaw == yaw) return kept;
++    kept?.dispose();
++    final tri = meshTriangles(this, yaw);
++    _batchYaw = yaw;
++    return _batch =
++        ui.Vertices.raw(ui.VertexMode.triangles, tri.positions, colors: tri.colors);
++  }
++}
++
++/// The camera a mesh is laid out under before it is placed: one pixel to the
++/// tile, standing on the origin. Only the yaw is the real camera's.
++Projector _meshSpace(double yaw) => Projector(1, 1, 1.0, Offset.zero, yaw);
++
++/// [mesh] flattened for a camera at [yaw]: xy pairs and one ARGB per vertex,
++/// three vertices a triangle, in paint order. Positions are in tile units
++/// around the mesh's own tile centre, so the same list serves every tile and
++/// every zoom — the canvas places and scales it.
++///
++/// Two things keep a thousand-box voxel model cheap (#v37.1). The faces go to
++/// the canvas as one list instead of a path each: five draw calls a box was
++/// twenty thousand a frame for four models, and that — not the pixels — is
++/// what stalled the browser. And a box only gives up the faces turned toward
++/// the camera: its top and at most two walls. The two walls behind them lie
++/// wholly under those three, so leaving them out changes no pixel.
++({Float32List positions, Int32List colors}) meshTriangles(BoxMesh mesh, double yaw) {
++  final p = _meshSpace(yaw);
++  final order = meshDrawOrder(p, Offset.zero, mesh);
++  // Every box is axis-aligned, so which walls face the camera is one answer
++  // for the whole mesh: those whose outward normal points down the screen.
++  // Wall k runs from corner k to k+1 of [boxCornersAt]'s ring.
++  final facing = [
++    for (final n in const [Offset(0, -1), Offset(1, 0), Offset(0, 1), Offset(-1, 0)])
++      p.projectGrid(n).dy > 1e-9
++  ];
++  // top + two walls is the most a box can show: 3 quads = 6 triangles
++  final positions = Float32List(order.length * 36);
++  final colors = Int32List(order.length * 18);
++  var v = 0;
++  void quad(Offset a, Offset b, Offset c, Offset d, int argb) {
++    for (final o in [a, b, c, a, c, d]) {
++      positions[v * 2] = o.dx;
++      positions[v * 2 + 1] = o.dy;
++      colors[v++] = argb;
++    }
++  }
++
++  for (final i in order) {
++    final b = mesh.boxes[i];
++    final c = boxCornersAt(p, Offset(b.x, b.y), b.w / 2, b.d / 2, b.z, b.h);
++    for (var k = 0; k < 4; k++) {
++      if (!facing[k]) continue;
++      final n = (k + 1) % 4;
++      quad(c[k], c[n], c[n + 4], c[k + 4], b.side);
++    }
++    quad(c[4], c[5], c[6], c[7], b.top);
++  }
++  return (
++    positions: Float32List.sublistView(positions, 0, v * 2),
++    colors: Int32List.sublistView(colors, 0, v),
++  );
+ }
+ 
+ /// Back-to-front paint order for one mesh's boxes at the current yaw.
+@@ -618,27 +696,32 @@ class BoxMesh {
+ /// Keyed on each box's own footprint centre, so a far wall paints before the
+ /// near one and the house does not turn inside out as the garden is twisted.
+ /// [stableDepthOrder] keeps tied (stacked) boxes in their authored order.
++///
++/// Depths are rounded to a billionth before they are compared. Square to the
++/// camera a quarter turn round, cos(yaw) is not 0 but 6e-17, and that crumb
++/// times a box's y would split boxes that are level with each other — putting
++/// a door behind the wall it hangs on. Level boxes must tie, and fall back on
++/// the order they were authored in.
+ List<int> meshDrawOrder(Projector p, Offset gridCentre, BoxMesh mesh) =>
+     stableDepthOrder([
+-      for (final b in mesh.boxes) p.projectGrid(gridCentre.translate(b.x, b.y)).dy
++      for (final b in mesh.boxes)
++        (p.projectGrid(gridCentre.translate(b.x, b.y)).dy * 1e9).roundToDouble()
+     ]);
+ 
+-/// Draw [mesh] standing on the tile at [gridCentre]: every box as four side
+-/// quads plus its brighter top, in back-to-front order.
++/// Draw [mesh] standing on the tile at [gridCentre]: every box as its
++/// camera-facing walls plus its brighter top, back to front, in one draw call.
+ void paintMesh(Canvas canvas, Projector p, Offset gridCentre, BoxMesh mesh) {
+-  for (final i in meshDrawOrder(p, gridCentre, mesh)) {
+-    final b = mesh.boxes[i];
+-    final c = boxCornersAt(
+-        p, gridCentre.translate(b.x, b.y), b.w / 2, b.d / 2, b.z, b.h);
+-    final side = Color(b.side);
+-    for (var k = 0; k < 4; k++) {
+-      final n = (k + 1) % 4;
+-      fillQuad(canvas, c[k], c[n], c[n + 4], c[k + 4], side);
+-    }
+-    fillQuad(canvas, c[4], c[5], c[6], c[7], Color(b.top));
+-  }
++  final at = p.projectGrid(gridCentre);
++  canvas.save();
++  canvas.translate(at.dx, at.dy);
++  canvas.scale(p.t);
++  // BlendMode.dst: the vertices carry the colours, the paint adds none.
++  canvas.drawVertices(mesh.batchFor(p.yaw + mesh.turn), BlendMode.dst, _meshPaint);
++  canvas.restore();
+ }
+ 
++final Paint _meshPaint = Paint()..isAntiAlias = false;
++
+ // ---- sprite bank ------------------------------------------------------------
+ 
+ /// Decoded PNGs from assets/objects/, keyed by id. Critters are 8-frame
+diff --git a/flutter/lib/engine/garden_view.dart b/flutter/lib/engine/garden_view.dart
+index 1a067cc..f43da04 100644
+--- a/flutter/lib/engine/garden_view.dart
++++ b/flutter/lib/engine/garden_view.dart
+@@ -4,16 +4,20 @@
+ // no viewing-angle control beyond yaw — the 2.5D depth is fixed (see kVy).
+ //
+ // Desktop/web drives the same camera with mouse + keyboard (#v33.8): the wheel
+-// zooms, WASD/arrows walk the pan, and holding the MIDDLE button while dragging
+-// turns the yaw — the mouse spelling of the phone's two-finger twist. Touch
+-// gestures are untouched; on a phone these handlers simply never fire.
++// zooms, WASD/arrows walk the pan, and holding the RIGHT button while dragging
++// turns the yaw — the mouse spelling of the phone's two-finger twist. The right
++// button because every mouse and every touchpad has one that works (#v37.1);
++// the middle button it used to be still turns the camera too. Touch gestures
++// are untouched; on a phone these handlers simply never fire.
+ import 'dart:math' as math;
+ 
++import 'package:flutter/foundation.dart' show kIsWeb;
+ import 'package:flutter/gestures.dart'
+-    show PointerScrollEvent, PointerSignalEvent, kMiddleMouseButton;
++    show PointerScrollEvent, PointerSignalEvent, kMiddleMouseButton, kSecondaryMouseButton;
+ import 'package:flutter/material.dart';
+ import 'package:flutter/scheduler.dart' show Ticker;
+-import 'package:flutter/services.dart' show KeyEvent, KeyUpEvent, LogicalKeyboardKey;
++import 'package:flutter/services.dart'
++    show BrowserContextMenu, KeyEvent, KeyUpEvent, LogicalKeyboardKey;
+ 
+ import '../logic.dart';
+ import 'garden_engine.dart';
+@@ -67,9 +71,14 @@ Offset wasdPan(LogicalKeyboardKey key, {double step = 32}) {
+   return Offset.zero;
+ }
+ 
+-/// Radians of yaw for a middle-drag of [dx] screen pixels — 100px turns ~1rad,
++/// Whether a press with these mouse [buttons] held starts turning the camera:
++/// the right button, or the middle one.
++bool turnsCamera(int buttons) =>
++    buttons & (kSecondaryMouseButton | kMiddleMouseButton) != 0;
++
++/// Radians of yaw for a turning drag of [dx] screen pixels — 100px turns ~1rad,
+ /// gentle enough to aim, fast enough to orbit the plot in one swipe.
+-double middleDragYaw(double dx) => dx * 0.01;
++double turnDragYaw(double dx) => dx * 0.01;
+ 
+ class GardenView extends StatefulWidget {
+   final Garden garden;
+@@ -141,8 +150,8 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
+   double _zoomAtStart = 1;
+   double _yawAtStart = 0;
+   Size _lastSize = Size.zero;
+-  bool _middleDrag = false; // mouse middle-button held: drag turns the yaw
+-  double _middleX = 0;
++  bool _turnDrag = false; // right (or middle) mouse button held: drag turns the yaw
++  double _turnX = 0;
+ 
+   @override
+   void initState() {
+@@ -153,10 +162,15 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
+       _critters.step(dt, math.max(widget.garden.cols, widget.garden.rows), _flowerTargets());
+       _frame.value++; // nudges the painter to repaint
+     })..start();
++    // In a browser the right button belongs to the page's own menu, which
++    // would pop up over the garden at the end of every turn. It is switched
++    // off for as long as a garden you can turn is on screen.
++    if (kIsWeb && widget.interactive) BrowserContextMenu.disableContextMenu();
+   }
+ 
+   @override
+   void dispose() {
++    if (kIsWeb && widget.interactive) BrowserContextMenu.enableContextMenu();
+     _ticker.dispose();
+     _frame.dispose();
+     super.dispose();
+@@ -220,21 +234,21 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
+   }
+ 
+   void _onPointerDown(PointerDownEvent e) {
+-    if (e.buttons & kMiddleMouseButton != 0) {
+-      _middleDrag = true;
+-      _middleX = e.position.dx;
++    if (turnsCamera(e.buttons)) {
++      _turnDrag = true;
++      _turnX = e.position.dx;
+     }
+   }
+ 
+   void _onPointerMove(PointerMoveEvent e) {
+-    if (!_middleDrag) return;
++    if (!_turnDrag) return;
+     setState(() {
+-      _cam.yaw += middleDragYaw(e.position.dx - _middleX);
+-      _middleX = e.position.dx;
++      _cam.yaw += turnDragYaw(e.position.dx - _turnX);
++      _turnX = e.position.dx;
+     });
+   }
+ 
+-  void _endMiddleDrag(PointerEvent _) => _middleDrag = false;
++  void _endTurnDrag(PointerEvent _) => _turnDrag = false;
+ 
+   KeyEventResult _onKey(FocusNode node, KeyEvent e) {
+     if (e is KeyUpEvent) return KeyEventResult.ignored;
+@@ -249,9 +263,9 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
+   }
+ 
+   void _onScaleUpdate(ScaleUpdateDetails d) {
+-    // The scale recognizer also tracks middle-button drags; while one is
+-    // turning the yaw, letting it pan too would smear both motions together.
+-    if (_middleDrag) return;
++    // The scale recognizer may track the turning drag too; while one is
++    // turning the yaw, letting it pan as well would smear both motions together.
++    if (_turnDrag) return;
+     setState(() {
+       // min 0.5 (was 1.0) so you can zoom out far enough to frame the WHOLE
+       // garden from any yaw — a rotated plot's bounding box is larger, so it used
+@@ -345,8 +359,8 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
+                         onPointerSignal: _onPointerSignal,
+                         onPointerDown: _onPointerDown,
+                         onPointerMove: _onPointerMove,
+-                        onPointerUp: _endMiddleDrag,
+-                        onPointerCancel: _endMiddleDrag,
++                        onPointerUp: _endTurnDrag,
++                        onPointerCancel: _endTurnDrag,
+                         child: GestureDetector(
+                           onScaleStart: _onScaleStart,
+                           onScaleUpdate: _onScaleUpdate,
+diff --git a/flutter/lib/logic.dart b/flutter/lib/logic.dart
+index 8e9b2f6..53768ca 100644
+--- a/flutter/lib/logic.dart
++++ b/flutter/lib/logic.dart
+@@ -552,9 +552,11 @@ class Flowers {
+     Flower('anthurium', _loc('Anthurium', 'Antoryum', 'Anturium', 'Flamingoblume', '안스리움', 'Anthurium'), 0xFFFF5A5A, 0xFFF2C94C, _bloom),
+     Flower('pilea', _loc('Pilea', 'Pilea', 'Pilea', 'Ufopflanze', '필레아', 'Pilea'), 0xFF3AAF62, 0xFF9BDDA8, _bloom),
+     Flower('sundew', _loc('Sundew', 'Güneşgülü', 'Rosiczka', 'Sonnentau', '끈끈이주걱', 'Drosera'), 0xFF35AE6E, 0xFFF2C94C, _bloom),
+-    // Drawing Patch 2 (#v37) — seven more of the user's own drawings. The same
+-    // sheet redrew pilea, sundew and the daisy, which kept their ids, so
+-    // gardens already planted with them simply show the new art.
++    // Drawing Patch 2 (#v37) — more of the user's own drawings. The same sheet
++    // redrew pilea and sundew, which kept their ids, so gardens already planted
++    // with them simply show the new art. v0.37 put the sheet's chamomile under
++    // the daisy's id; it is a species of its own, and the daisy has its two
++    // models back.
+     Flower('maculata', _loc('Polka Dot Begonia', 'Benekli Begonya', 'Begonia plamista', 'Forellenbegonie', '물방울 베고니아', 'Begonia maculata'), 0xFF2E7D4F, 0xFFFFFFFF, _bloom),
+     Flower('cornflower', _loc('Cornflower', 'Peygamber Çiçeği', 'Chaber', 'Kornblume', '수레국화', 'Fiordaliso'), 0xFF3F8FE0, 0xFF1F4E9E, _bloom),
+     Flower('forgetmenot', _loc('Forget-Me-Not', 'Unutma Beni', 'Niezapominajka', 'Vergissmeinnicht', '물망초', 'Nontiscordardimé'), 0xFF5AA9F0, 0xFFF2C94C, _bloom),
+@@ -562,6 +564,7 @@ class Flowers {
+     Flower('lithops', _loc('Lithops', 'Lithops', 'Litops', 'Lithops', '리톱스', 'Lithops'), 0xFF2F9E6E, 0xFFFFFFFF, _bloom),
+     Flower('sunflower', _loc('Sunflower', 'Ayçiçeği', 'Słonecznik', 'Sonnenblume', '해바라기', 'Girasole'), 0xFFF2B01E, 0xFF5A3418, _bloom),
+     Flower('tradescantia', _loc('Tradescantia', 'Telgraf Çiçeği', 'Trzykrotka', 'Dreimasterblume', '자주달개비', 'Tradescantia'), 0xFF2E6B3A, 0xFF4A3A6E, _bloom),
++    Flower('chamomile', _loc('Chamomile', 'Mayıs Papatyası', 'Rumianek', 'Kamille', '캐모마일', 'Camomilla'), 0xFFFFFFFF, 0xFFF2C94C, _bloom),
+   ];
+ 
+   static Flower? byId(String? id) {
+@@ -575,12 +578,10 @@ class Flowers {
+   /// time the flower is planted (#v22). Every species now has 2 hand-authored
+   /// models in one consistent APICO/Littlewood style (rose is the reference;
+   /// the rest were rolled out from the user's per-flower guide sheets, #v24) —
+-  /// except the ones the user drew in a single form (anthurium, #v36.1; five of
+-  /// Drawing Patch 2, #v37), which are absent here and fall through to 1. The
+-  /// daisy joined them when Drawing Patch 2 redrew it as one model: a garden
+-  /// still holding `papatya~1` falls back to the base sprite in both renderers.
++  /// except the ones the user drew in a single form (anthurium, #v36.1; six of
++  /// Drawing Patch 2, #v37), which are absent here and fall through to 1.
+   static const variantCounts = <String, int>{
+-    'gul': 2, 'lale': 2, 'kamelya': 2, 'kasimpati': 2,
++    'gul': 2, 'papatya': 2, 'lale': 2, 'kamelya': 2, 'kasimpati': 2,
+     'menekse': 2, 'nilufer': 2, 'begonya': 2, 'orkide': 2,
+     'kaktusf': 2, 'kaktusd': 2, // cactus 2.0 from the guide-sheet study (#v26)
+     'pilea': 2, 'sundew': 2, // Drawing Patch 1 (#v36.1)
+@@ -690,10 +691,18 @@ class Placeables {
+ 
+   static const objectIds = [...roadIds, ...fenceIds, ...houseIds];
+ 
+-  static bool isObject(String id) => objectIds.contains(id);
+-  static bool isRoad(String id) => roadIds.contains(id);
++  /// Grounds and buildings registered while the program runs. The game
++  /// registers none: these are for the Dev Kit, where an artist adds a floor
++  /// tile or a voxel model that no const list can know about, and it has to be
++  /// laid flat or drawn as geometry by the same painter the game uses.
++  static final Set<String> importedRoadIds = {};
++  static final Set<String> importedHouseIds = {};
++
++  static bool isObject(String id) =>
++      objectIds.contains(id) || importedRoadIds.contains(id) || importedHouseIds.contains(id);
++  static bool isRoad(String id) => roadIds.contains(id) || importedRoadIds.contains(id);
+   static bool isFence(String id) => fenceIds.contains(id);
+-  static bool isHouse(String id) => houseIds.contains(id);
++  static bool isHouse(String id) => houseIds.contains(id) || importedHouseIds.contains(id);
+   static bool isTestHouse(String id) => testHouseIds.contains(id);
+   static bool isFlower(String id) => id.isNotEmpty && !isObject(id);
+ 
+diff --git a/flutter/tools/gen_objects.py b/flutter/tools/gen_objects.py
+index dbbe610..690627e 100644
+--- a/flutter/tools/gen_objects.py
++++ b/flutter/tools/gen_objects.py
+@@ -1477,12 +1477,10 @@ def main():
+     # directly as flower_{anthurium,pilea,sundew}[_0|_1].png exactly like
+     # coin.png and the menu icons. This loop only touches ids in FLOWERS, so a
+     # regen leaves them alone; putting them in FLOWERS would overwrite the art.
+-    # Drawing Patch 2 (#v37) added seven more the same way and REDREW the daisy,
+-    # which is in FLOWERS — so it is skipped by name. Its grids stay above
+-    # because the Art Kit still reads them.
++    # Drawing Patch 2 (#v37) added seven more the same way, and an eighth that
++    # v0.37 shipped as a redrawn daisy: it is its own species, the chamomile
++    # (flower_chamomile.png), and the daisy is written here again as before.
+     for fid, (petal, center, chars) in FLOWERS.items():
+-        if fid == 'papatya':
+-            continue
+         if fid == 'gul':
+             for v in range(2):  # rose: 2 hand-authored models (#v22)
+                 write_png(os.path.join(OUT, f"flower_gul_{v}.png"), upscale(rose_variant(v), SCALE))

@@ -3,40 +3,67 @@ PIXEL POMO DEV KIT - macOS
 
 See your own sprite or voxel model standing in Pixel Pomo's garden.
 
-NOTE: this Mac build has not been tried on a Mac yet. If a step below does
-not go as written, that is worth reporting exactly as it happened.
+NOTE: this is the first Mac build. It was built and started on GitHub's
+Macs, with no window; nobody has yet opened it on a Mac with a screen. If a
+step below does not go as written, what happened instead is worth reporting
+exactly.
 
 
-INSTALL IT - ONE LINE, NO WARNINGS
+INSTALL IT
 
-  Open Terminal (Cmd + Space, type "Terminal", Enter), paste this line and
-  press Enter:
+  1. You downloaded PixelPomoDevKit-macos-....zip and this file was in it,
+     so there is now a folder called PixelPomoDevKit-macos-... in Downloads.
+     (Which zip: Apple menu > About This Mac. "Chip: Apple M..." is
+     apple-silicon; "Processor: ... Intel ..." is intel.)
 
-    curl -fsSL https://github.com/hero-999-dev/pixel_pomo_dev_kit/releases/latest/download/install-mac.sh | sh
+  2. Do NOT double-click the app yet. The Dev Kit is not signed with a paid
+     Apple developer account, so macOS refuses to open it straight from a
+     download ("Apple could not verify..."). One line removes that mark and
+     opens it. Open Terminal (Cmd + Space, type "Terminal", Enter), paste
+     this line and press Enter:
 
-  It picks the right build for your Mac (Apple Silicon or Intel), fetches it
-  and opens the setup. macOS shows no "cannot be opened" warning, because a
-  file fetched this way is not marked as a browser download.
+    cd ~/Downloads && xattr -dr com.apple.quarantine PixelPomoDevKit-macos-* && open PixelPomoDevKit-macos-*/PixelPomoDevKit.app
 
-  The setup asks where the Dev Kit should live and suggests
+     Nothing is printed when it works. The setup window opens.
+
+  3. The setup asks where the Dev Kit should live and suggests
 
       /Applications/PixelPomoDevKit
 
-  Press INSTALL. The kit opens from there, and that folder is where it stays.
+     Press INSTALL, then OPEN THE DEV KIT. Do not choose Documents, Desktop
+     or Downloads: those are the three folders macOS asks permission for.
+
+  4. From now on open it from /Applications/PixelPomoDevKit - drag the app
+     to the Dock to keep it there. The folder in Downloads can go in the
+     Trash.
 
 
-IF YOU DOWNLOADED THE ZIP IN A BROWSER INSTEAD
+IF YOU ALREADY DOUBLE-CLICKED IT AND macOS SAID NO
 
-  The app is not signed, so macOS blocks a browser download the first time.
-    "Chip: Apple M..."      ->  PixelPomoDevKit-macos-apple-silicon.zip
-    "Processor: Intel..."   ->  PixelPomoDevKit-macos-intel.zip
-  Unzip it, then in Terminal:
+  Nothing is broken. Click Done on the warning (not "Move to Trash"), then
+  run the line above - or, without Terminal: System Settings > Privacy &
+  Security, scroll down to "PixelPomoDevKit was blocked", click Open Anyway
+  and confirm.
 
-      xattr -dr com.apple.quarantine ~/Downloads/PixelPomoDevKit.app
-      open ~/Downloads/PixelPomoDevKit.app
 
-  and the same setup opens. (Without Terminal: double-click, click Done on
-  the warning, then System Settings > Privacy & Security > Open Anyway.)
+IF TERMINAL SAYS "No such file or directory"
+
+  The download is not in Downloads, or is still a .zip: double-click the
+  .zip first. If you keep it somewhere else, type
+
+      xattr -dr com.apple.quarantine
+
+  and a space, drag the PixelPomoDevKit app from Finder onto the Terminal
+  window, press Enter, and then double-click the app.
+
+
+THE ONE-LINE INSTALL (only once the kit's repository is public)
+
+    curl -fsSL https://github.com/hero-999-dev/pixel_pomo_dev_kit/releases/latest/download/install-mac.sh | sh
+
+  It picks the right build, fetches it and opens the setup: no download to
+  unzip, no warning to get past. While the repository is private the line
+  cannot reach the files, and says the download failed.
 
 
 USE IT
@@ -70,6 +97,8 @@ UPDATES
 
   UPDATE, top right, says when a newer version is out. Click it: the kit
   downloads it, closes, and opens again as the new version. It replaces the
-  app only; the Files folder is not touched.
+  app only; the Files folder is not touched. (It can only look for versions
+  once the kit's repository is public. Until then, a newer download opened
+  the same way as above updates the installed kit and keeps your files.)
 
   devkit.log in the Files folder says what went wrong if the kit misbehaves.

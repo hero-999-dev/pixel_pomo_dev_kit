@@ -1,14 +1,18 @@
 # Build the Dev Kit for Windows AND macOS, and publish both to one release.
 #
-# NOT YET RUN. Written beside the Art Kit's release workflow, which has the
-# same shape and works; the differences (a Flutter build, a wider sparse
-# checkout of the game) have not met a runner. Expect the first run to need a
-# fix or two, and try it with workflow_dispatch before pushing a tag.
+# Two ways in:
+# - pushing a tag `v*` builds on all three runners and publishes;
+# - by hand (Actions -> Release Dev Kit -> Run workflow), where `publish` can
+#   be turned off and `runners` cut down to one. That is how a Mac-only
+#   failure is chased: the Mac runners bill ten minutes for one while this
+#   repository is private, and a release is the wrong place to find out that
+#   a test does not pass on a Mac.
 #
 # Like the Art Kit's, it checks out the game as a SECOND repository: the page
 # is compiled against the game's engine and the program bundles the game's
-# voxel converter. If the game repo is private the built-in token cannot read
-# it; put a read-only PAT in the secret APP_REPO_TOKEN.
+# voxel converter. `game_ahead.py` then applies what the kit needs and the
+# game has not published yet. If the game repo is private the built-in token
+# cannot read it; put a read-only PAT in the secret APP_REPO_TOKEN.
 name: Release Dev Kit
 
 on:
@@ -17,26 +21,31 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to publish (e.g. v0.1.0)'
+        description: 'Tag to publish (e.g. v0.1.1)'
         required: true
+      publish:
+        description: 'Publish to the release (no: build and test only)'
+        type: choice
+        options: ['yes', 'no']
+        default: 'yes'
+      runners:
+        description: 'Runners, as a JSON list'
+        default: '["windows-latest", "macos-latest", "macos-15-intel"]'
 
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: windows-latest
-            artifact: PixelPomoDevKit-windows
-          # Two Mac builds: PyInstaller cannot cross-compile between
-          # architectures, so an Intel Mac needs a binary from an Intel runner.
-          - os: macos-latest
-            artifact: PixelPomoDevKit-macos-apple-silicon
-          - os: macos-15-intel
-            artifact: PixelPomoDevKit-macos-intel
+        # Two Mac builds: PyInstaller cannot cross-compile between
+        # architectures, so an Intel Mac needs a binary from an Intel runner.
+        os: ${{ fromJSON(github.event.inputs.runners || '["windows-latest", "macos-latest", "macos-15-intel"]') }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      PUBLISH: ${{ github.event.inputs.publish || 'yes' }}
     steps:
       # The kit resolves the game RELATIVE to itself (DevKit/ -> ../App), so
       # the two checkouts have to land as siblings under one parent.
@@ -65,6 +74,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: What the kit needs that the game has not published yet
+        run: python DevKit/game_ahead.py App
+
       # the version this was developed against; the game's own CI pins its own
       - uses: subosito/flutter-action@v2
         with:
@@ -73,6 +85,16 @@ jobs:
 
       - name: Install
         run: python -m pip install --upgrade pip -r DevKit/requirements.txt
+
+      - name: Which build this is
+        shell: bash
+        run: |
+          case "$RUNNER_OS-$RUNNER_ARCH" in
+            Windows-*)   echo "ARTIFACT=PixelPomoDevKit-windows" >> "$GITHUB_ENV" ;;
+            macOS-ARM64) echo "ARTIFACT=PixelPomoDevKit-macos-apple-silicon" >> "$GITHUB_ENV" ;;
+            macOS-X64)   echo "ARTIFACT=PixelPomoDevKit-macos-intel" >> "$GITHUB_ENV" ;;
+            *) echo "no build for $RUNNER_OS-$RUNNER_ARCH"; exit 1 ;;
+          esac
 
       # The page first: the Dart tests need the game's art copied in.
       - name: Build the page
@@ -91,6 +113,12 @@ jobs:
         working-directory: DevKit
         run: python -m PyInstaller PixelPomoDevKit.spec --noconfirm --clean
 
+      # The program as built, started without its window: does it unpack,
+      # serve its page and convert a model with the converter inside it?
+      - name: Try the program
+        working-directory: DevKit
+        run: python smoke.py
+
       - name: Package (Windows)
         if: runner.os == 'Windows'
         working-directory: DevKit
@@ -99,7 +127,7 @@ jobs:
           copy dist\PixelPomoDevKit.exe stage\
           copy READ-ME-FIRST.txt stage\
           copy assets\icon.png stage\
-          powershell Compress-Archive -Path stage\* -DestinationPath ${{ matrix.artifact }}.zip -Force
+          powershell Compress-Archive -Path stage\* -DestinationPath $env:ARTIFACT.zip -Force
 
       - name: Package (macOS)
         if: runner.os == 'macOS'
@@ -109,32 +137,34 @@ jobs:
           cp -R dist/PixelPomoDevKit.app stage/
           cp READ-ME-FIRST-MAC.txt stage/
           cp assets/icon.png stage/
-          cd stage && zip -qry ../${{ matrix.artifact }}.zip .
+          cd stage && zip -qry "../$ARTIFACT.zip" .
 
       # Straight to the release, not via upload-artifact - see the Art Kit's
-      # workflow for the storage quota that taught this.
+      # workflow for the storage quota that taught this. The release's text
+      # is INSTALL.md: how to install is the first thing on the page the
+      # download is on.
       - name: Publish to the release
+        if: env.PUBLISH == 'yes'
         shell: bash
         working-directory: DevKit
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
           gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
-            --title "Pixel Pomo Dev Kit $TAG" --generate-notes \
+            --title "Pixel Pomo Dev Kit $TAG" --notes-file INSTALL.md \
             || echo "release already exists — uploading into it"
           gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
-            "${{ matrix.artifact }}.zip"
+            "$ARTIFACT.zip"
 
-      # The Mac's one-line install (READ-ME-FIRST-MAC.txt) fetches this from
-      # the release itself, so it has to be an asset. Once, from one job.
-      - name: Publish the Mac install script
-        if: matrix.artifact == 'PixelPomoDevKit-macos-apple-silicon'
+      # The Mac's guide, to read before downloading, and the one-line install
+      # it mentions, which fetches itself from the release. Once, from one job.
+      - name: Publish the Mac guide and install script
+        if: env.PUBLISH == 'yes' && env.ARTIFACT == 'PixelPomoDevKit-macos-apple-silicon'
         shell: bash
         working-directory: DevKit
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
           sh -n install-mac.sh
-          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber install-mac.sh
+          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
+            install-mac.sh READ-ME-FIRST-MAC.txt

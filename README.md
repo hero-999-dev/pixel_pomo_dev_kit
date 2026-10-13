@@ -46,14 +46,16 @@ the marker beside the program it built, so `dist\PixelPomoDevKit.exe` opens the
 kit, files in `dist\Files`, and a rebuild leaves those files alone. To see the
 setup, start a copy of the program from any other folder. (Not in CI.)
 
-**On a Mac the install is one line in Terminal** (`install-mac.sh`, in
-`READ-ME-FIRST-MAC.txt`). The kit is not signed with an Apple Developer ID, and
-macOS quarantines whatever a *browser* downloads — which is the "cannot be
-opened" warning and the trip through System Settings that the Art Kit's Mac
-guide spends two pages on. A file fetched with `curl` is not quarantined, so
-the same app opens with no warning at all. The other question the Art Kit's
-artists met, "allow access to Documents?", cannot come up: the kit keeps
-nothing in Documents, Desktop or Downloads.
+**On a Mac** the kit is not signed with an Apple Developer ID, and macOS
+quarantines whatever a *browser* downloads — which is the "could not verify"
+warning and the trip through System Settings that the Art Kit's Mac guide
+spends two pages on. [`INSTALL.md`](INSTALL.md) is the guide (it is also the
+text of every release, above the downloads): download the zip, then one line
+in Terminal takes the quarantine mark off and opens the setup, with no warning.
+Once the repository is public there is a shorter way, `install-mac.sh` through
+`curl`, which is never quarantined in the first place. The other question the
+Art Kit's artists met, "allow access to Documents?", cannot come up: the kit
+keeps nothing in Documents, Desktop or Downloads.
 
 ## Where the files are
 
@@ -274,8 +276,32 @@ copies the game's art in from `..\App`.
 Tests:
 
 ```powershell
-cd DevKit;      python -m unittest discover -s tests -t .     # the launcher (142)
+cd DevKit;      python -m unittest discover -s tests -t .     # the launcher (157)
 cd DevKit\app;  flutter test                                   # the page (67)
+cd DevKit;      python smoke.py                               # the built program, without its window
+```
+
+### Releasing
+
+Pushing a tag `v*` runs `.github/workflows/release.yml`: Windows, Apple Silicon
+and Intel builds, each tested and then started once by `smoke.py`, published
+to one release whose text is [`INSTALL.md`](INSTALL.md). Started by hand
+(Actions → Release Dev Kit → Run workflow) it can build without publishing and
+on one runner only, which is how a Mac-only failure is chased.
+
+**`game-ahead.patch`** is what the kit needs from the game that the game has
+not published yet. CI checks out the game as published and `game_ahead.py`
+applies the patch to it, so a release of the kit neither waits for nor forces
+a release of the game. When the game has caught up the script says so and the
+patch can be deleted; if the game moves under it, make it again from the game
+folder, without touching the game's own index:
+
+```sh
+cd App
+export GIT_INDEX_FILE="$PWD/.git/devkit-patch-index" && git read-tree HEAD
+git add -A flutter/lib flutter/assets flutter/tools
+git diff --cached --binary HEAD -- flutter/lib flutter/assets flutter/tools > ../DevKit/game-ahead.patch
+rm "$GIT_INDEX_FILE"; unset GIT_INDEX_FILE
 ```
 
 For looking at the page in another browser, or driving it from a script:
