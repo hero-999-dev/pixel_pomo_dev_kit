@@ -3,7 +3,7 @@
 The release tag is `v` + this string; `updater.py` compares it with the latest
 release of REPO.
 """
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 # Where releases are published. Named after the Art Kit's
 # (hero-999-dev/pixel_pomo_art_kit); the repository does not exist until the

@@ -87,8 +87,10 @@ the line cannot reach the files, and says the download failed.
    protected your PC"*, because the program is not signed: click **More info**,
    then **Run anyway**.
 3. The setup suggests `C:\Program Files\PixelPomoDevKit`. Press **INSTALL**.
-   Windows asks once whether the program may be put there — say **Yes**. (A
-   folder of your own, like `D:\Tools`, is not asked about.)
+   Windows asks once whether the program may be put there — say **Yes**. If
+   the setup says it is waiting for Windows and you see no question, the
+   question opened behind the window: click the shield flashing on the
+   taskbar. (A folder of your own, like `D:\Tools`, is not asked about.)
 4. Start it from the shortcut on the Desktop. The download is no longer needed.
 
 ## What it does

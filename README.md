@@ -12,7 +12,7 @@ own engine (`App/flutter/lib/engine`, used as a package, not copied) and a
 `.vox` is converted by the game's own `vox_to_boxes.py`, so what stands in the
 kit's garden is what the game will draw.
 
-**Status: v0.1.1, released** in a private repository — [how to install it](INSTALL.md). Checked on Windows.
+**Status: v0.1.2, released** in a private repository — [how to install it](INSTALL.md). Checked on Windows.
 The macOS builds were made, tested and started without a window on GitHub's Macs; nobody has
 opened one on a Mac with a screen yet — see [What has and has not been tried](#what-has-and-has-not-been-tried).
 
@@ -34,12 +34,22 @@ and offers **UPDATE** instead, files kept.
 **Program Files belongs to the system**, so installing there takes the one
 permission question every Windows installer asks. The setup says so under the
 folder box before INSTALL is pressed. Behind it the program starts itself once
-more, with that permission, as `PixelPomoDevKit.exe --place <folder>`: it copies
-the kit, gives the artist's account the right to write in the kit's own folder
+more, with that permission, as `PixelPomoDevKit.exe --open-folder <folder>`: it
+makes the kit's folder, gives the artist's account the right to write in it
 (`Files` is in it, and an update replaces the program in it) and stops. The
-Desktop shortcut and the note of where the kit is are made afterwards, as the
-artist. A folder the account can already write is installed into with no
-question. Answering no installs nothing and says so.
+copying, the Desktop shortcut and the note of where the kit is are then done by
+the setup itself, as the artist. A folder the account can already write is
+installed into with no question. Answering no installs nothing and says so.
+
+**The setup shows what it is doing.** INSTALL turns into a bar with the step in
+words under it — waiting for Windows, copying (megabyte by megabyte), writing
+down the install, the shortcut — because the work runs on a thread of its own
+and the page asks how far it is. While Windows' question is unanswered the
+setup says where to look for it: that question can open *behind* the window, as
+a shield flashing on the taskbar. v0.1.1 asked it for no window in particular,
+showed `INSTALLING...` and nothing else, and could only be ended from Task
+Manager; it is now asked for the setup window, and CANCEL or the window's X
+ends the setup whatever it is waiting on.
 
 **`dist` on the build machine is itself an install.** `build.py` ends by writing
 the marker beside the program it built, so `dist\PixelPomoDevKit.exe` opens the
@@ -276,7 +286,7 @@ copies the game's art in from `..\App`.
 Tests:
 
 ```powershell
-cd DevKit;      python -m unittest discover -s tests -t .     # the launcher (157)
+cd DevKit;      python -m unittest discover -s tests -t .     # the launcher (169)
 cd DevKit\app;  flutter test                                   # the page (67)
 cd DevKit;      python smoke.py                               # the built program, without its window
 ```
@@ -320,7 +330,7 @@ For looking at the page in another browser, or driving it from a script:
 Tried, on this Windows machine, with the packaged `.exe` and a debugger
 attached to the page inside its own windows:
 
-- **setup**: a first start offers `C:\Program Files\PixelPomoDevKit` and says Windows will ask for permission, refuses what is not a full path, installs into a typed folder (with a folder of its own), writes the program, the marker and `Files`, and opens the installed kit;
+- **setup**: a first start offers `C:\Program Files\PixelPomoDevKit` and says Windows will ask for permission, shows a bar and each step in words while it installs, refuses what is not a full path, installs into a typed folder (with a folder of its own), writes the program, the marker and `Files`, and opens the installed kit;
 - **what v0.1.0 left** is brought over on that first start — a real v0.1.0 library and garden, from a stand-in for `%LOCALAPPDATA%`;
 - **a newer build started as a download** says the kit is installed, offers UPDATE, replaces the program and keeps every file;
 - **UPDATE**, against a pretend release served on this machine: the button says `UPDATE v0.1.2`, the kit downloads it, closes, and opens as 0.1.2 about ten seconds later, with one program in the folder, the 0.1.1 one in `Files\updates`, and the library untouched;
@@ -337,7 +347,7 @@ everything is still there after a restart.
 
 Not tried:
 
-- **Windows' permission question itself.** Installing into the suggested `C:\Program Files\PixelPomoDevKit` needs someone to answer it, and the account this was built under is not an administrator. Everything on both sides of the question was run with the packaged program — the setup says the question is coming, `--place` puts the kit in a folder and opens it to an account, the setup carries on from its report — but the question was never put and never answered here. If it goes wrong, the setup's words and `%LOCALAPPDATA%\PixelPomoDevKit\setup.log` say how.
+- **Windows' permission question, answered.** Installing into the suggested `C:\Program Files\PixelPomoDevKit` needs someone to say Yes, and the sessions this was built in have nobody to: there the question is never answered at all. That is how v0.1.1's stuck `INSTALLING...` was found again, and how the wait was tried — the bar, the words, where to look, CANCEL ending the program. What follows a Yes was tried in pieces with the packaged program (`--open-folder` makes a folder and opens it to an account; the setup then copies into it), never as one run through the question. `%LOCALAPPDATA%\PixelPomoDevKit\setup.log` says how far an install got.
 - **The windows on a desktop, by eye.** The sessions this was built in have no screen: both windows were created, driven and closed, and their contents captured, but their frames, title-bar icons and taskbar buttons have not been looked at by anyone here.
 - **The desktop shortcut's look.** The shortcut is made and points at the program; its icon on a real Desktop has not been seen.
 - **The folder BROWSE button** in the setup window: it opens the system's folder dialog, which a script cannot answer. The typed path was used instead.

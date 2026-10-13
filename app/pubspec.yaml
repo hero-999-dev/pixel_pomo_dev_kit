@@ -1,7 +1,7 @@
 name: pixel_pomo_dev_kit
 description: "Pixel Pomo Dev Kit - the garden, with an artist's own sprites and voxel models in it."
 publish_to: 'none'
-version: 0.1.1+1
+version: 0.1.2+1
 
 environment:
   sdk: ^3.12.2

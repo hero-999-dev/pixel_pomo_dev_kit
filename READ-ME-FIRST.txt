@@ -23,6 +23,10 @@ INSTALL IT
   changes to your device?"). Say Yes. A folder of your own - D:\Tools, the
   Desktop - is not asked about.
 
+  If the setup says it is waiting for Windows and you see no question, the
+  question opened behind the window: click the shield flashing on the
+  taskbar. CANCEL stops the setup at any time.
+
   From then on, start it from the Desktop shortcut. The file you downloaded
   is no longer needed.
 

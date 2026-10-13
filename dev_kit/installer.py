@@ -13,12 +13,22 @@ same way offers to update the installed kit in place, files untouched.
 | macOS | `/Applications/PixelPomoDevKit` (or `~/Applications/...` where that is not writable) |
 
 Both are where programs go on that system. On Windows that folder belongs to
-the system, so writing the kit into it takes the one permission question every
-installer asks (`place_as_admin`): the program starts itself once more, with
-that permission, to do nothing but the copy — and to give the artist's account
-the right to write in the kit's own folder, because `Files` is in it and an
-update replaces the program in it. A folder the account can already write
-(`D:\\Tools`, the Desktop) is installed into with no question at all.
+the system, so the kit's own folder in it takes the one permission question
+every installer asks (`open_as_admin`): the program starts itself once more,
+with that permission, to do two things and stop - make the folder, and give
+the artist's account the right to write in it, because `Files` is in it and an
+update replaces the program in it. The copying is then done by the setup
+itself, as the artist, where its progress can be shown. A folder the account
+can already write (`D:\\Tools`, the Desktop) is installed into with no question
+at all.
+
+The setup window never waits blind. Installing runs on a thread of its own and
+the page asks `progress` how far it is: a bar, the step in words, and - while
+Windows' question is unanswered - where to look for it. That question can open
+BEHIND the window, as a shield flashing on the taskbar; v0.1.1 asked it for no
+window in particular, showed three dots, and could only be ended from Task
+Manager. It is now asked for the setup window, the page says what it is
+waiting for, and closing the window ends the setup whatever it is waiting on.
 
 On a Mac the folder is deliberately NOT Documents, Desktop or Downloads: those
 three are the ones macOS asks permission for, and the Art Kit's artists met
@@ -36,6 +46,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -45,9 +56,14 @@ from dev_kit.version import VERSION, parse
 log = logging.getLogger("dev_kit")
 
 SHORTCUT_NAME = "Pixel Pomo Dev Kit"
+SETUP_TITLE = "Pixel Pomo Dev Kit Setup"
 # The program started with this as its first word is the half of an install
-# that Windows gave permission to: it places the kit and stops.
-PLACE_FLAG = "--place"
+# that Windows gave permission to: it makes the kit's folder, opens it to the
+# artist's account, and stops.
+OPEN_FLAG = "--open-folder"
+# ...and how many seconds that may take once permission is given. It is a
+# second or two of work behind the program unpacking itself.
+PERMITTED_LIMIT = 120
 _CANCELLED = 1223   # ERROR_CANCELLED: the permission question was answered "no"
 
 
@@ -161,12 +177,33 @@ def _writable(target):
                       f"Choose another folder.") from None
 
 
-def _copy_program(source, program):
+def _size(path):
+    if path.is_dir():
+        return sum(f.stat().st_size for f in path.rglob("*")
+                   if f.is_file() and not f.is_symlink())
+    return path.stat().st_size
+
+
+def _copy_program(source, program, tell=None):
+    """Copy the program, saying how far it is: `tell(fraction)`, 0 to 1."""
     fresh = program.with_name(program.name + ".installing")
+    total, done = max(_size(source), 1), 0
+
+    def copy(src, dst):
+        nonlocal done
+        with open(src, "rb") as read, open(dst, "wb") as write:
+            for block in iter(lambda: read.read(1 << 20), b""):
+                write.write(block)
+                done += len(block)
+                if tell:
+                    tell(min(done / total, 1.0))
+        shutil.copystat(src, dst)
+        return dst
+
     try:
         if source.is_dir():   # a Mac .app
             shutil.rmtree(fresh, ignore_errors=True)
-            shutil.copytree(source, fresh, symlinks=True)
+            shutil.copytree(source, fresh, symlinks=True, copy_function=copy)
             old = program.with_name(program.name + ".replaced")
             shutil.rmtree(old, ignore_errors=True)
             if program.exists():
@@ -174,7 +211,7 @@ def _copy_program(source, program):
             os.replace(fresh, program)
             shutil.rmtree(old, ignore_errors=True)
         else:
-            shutil.copy2(source, fresh)
+            copy(source, fresh)
             os.replace(fresh, program)
     except PermissionError:
         raise Refused(f"The Dev Kit in {program.parent} is open. Close it, then "
@@ -197,16 +234,20 @@ def write_marker(folder, program):
                                              encoding="utf-8")
 
 
-def place(target, source=None):
+def place(target, source=None, tell=None):
     """The part of an install that writes in the install folder: the program,
     the marker that says "this folder is an install", and an empty `Files` if
-    there is none. Never touches what is in `Files`. Returns the program."""
+    there is none. Never touches what is in `Files`. Returns the program.
+    `tell(step, fraction)` is told what is being done."""
+    tell = tell or (lambda step, fraction=None: None)
     source = Path(source or paths.program_path())
     target = Path(target)
     _writable(target)
     program = target / source.name
+    tell("copying", 0.0)
     if source.resolve() != program.resolve():
-        _copy_program(source, program)
+        _copy_program(source, program, lambda fraction: tell("copying", fraction))
+    tell("finishing")
     (target / paths.FILES).mkdir(exist_ok=True)
     write_marker(target, program)
     return program
@@ -267,27 +308,32 @@ def allow(folder, sid):
                       f"({(done.stderr or done.stdout).strip()[:200]}).")
 
 
-def place_from_command(args):
-    """The program started as `PixelPomoDevKit.exe --place <folder> ...`, with
-    Windows' permission: make the folder, open it to the artist's account,
-    place the kit, write down how it went, and stop. No window, no kit."""
-    ap = argparse.ArgumentParser(prog=paths.NAME + " " + PLACE_FLAG)
+def open_folder_from_command(args):
+    """The program started as `PixelPomoDevKit.exe --open-folder <folder> ...`,
+    with Windows' permission: make the kit's folder, open it to the artist's
+    account, write down how it went, and stop. No window, no kit, and no
+    copying: once the folder is the artist's to write, the setup that asked
+    does the rest itself, where its progress can be seen."""
+    ap = argparse.ArgumentParser(prog=paths.NAME + " " + OPEN_FLAG)
     ap.add_argument("target")
-    ap.add_argument("--source")
     ap.add_argument("--for", dest="sid", default="")
     ap.add_argument("--report")
     asked = ap.parse_args(args)
     try:
         target = Path(asked.target)
-        target.mkdir(parents=True, exist_ok=True)
+        try:
+            target.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            raise Refused(f"The folder {target} could not be made "
+                          f"({exc.strerror or exc}).") from None
         allow(target, asked.sid)
-        place(target, asked.source)
         answer = {"ok": True}
     except Refused as exc:
         answer = {"error": str(exc)}
     except Exception as exc:  # noqa: BLE001 - whoever waits must get an answer
-        log.exception("placing the kit failed")
+        log.exception("opening the kit's folder failed")
         answer = {"error": f"The install did not finish: {exc}"}
+    log.info("%s %s: %s", OPEN_FLAG, asked.target, answer)
     if asked.report:
         try:
             Path(asked.report).write_text(json.dumps(answer), encoding="utf-8")
@@ -303,9 +349,32 @@ def _own_command():
     return [sys.executable, "-m", "dev_kit"]
 
 
-def _run_with_permission(command, cwd=None):
+def _setup_window():
+    """The setup window's handle, so that Windows puts its question in front
+    of it. A question asked for no window in particular can open BEHIND
+    everything, as a shield flashing on the taskbar - which is how v0.1.1's
+    setup came to sit at "INSTALLING..." for ever."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+        user32 = ctypes.WinDLL("user32", use_last_error=True)
+        user32.FindWindowW.restype = wintypes.HWND
+        user32.FindWindowW.argtypes = [wintypes.LPCWSTR, wintypes.LPCWSTR]
+        user32.SetForegroundWindow.argtypes = [wintypes.HWND]
+        window = user32.FindWindowW(None, SETUP_TITLE)
+        if window:
+            user32.SetForegroundWindow(window)
+        return window
+    except (OSError, AttributeError):
+        return None
+
+
+def _run_with_permission(command, cwd=None, window=None, limit=PERMITTED_LIMIT):
     """Start `command` through Windows' permission question and wait for it.
-    Returns its exit code, or None when the question was answered "no"."""
+    Returns its exit code; None when the question was answered "no"; raises
+    TimeoutError when it was allowed and then did not finish in `limit`
+    seconds. How long the QUESTION stays unanswered is not limited here:
+    that is the artist reading it."""
     import ctypes
     from ctypes import wintypes
 
@@ -321,19 +390,26 @@ def _run_with_permission(command, cwd=None):
 
     shell32 = ctypes.WinDLL("shell32", use_last_error=True)
     kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    ole32 = ctypes.WinDLL("ole32", use_last_error=True)
     kernel32.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
     kernel32.GetExitCodeProcess.argtypes = [wintypes.HANDLE,
                                             ctypes.POINTER(wintypes.DWORD)]
     kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    ole32.CoInitializeEx.argtypes = [ctypes.c_void_p, wintypes.DWORD]
+    ole32.CoInitializeEx.restype = ctypes.c_long
 
     info = Info()
     info.cbSize = ctypes.sizeof(Info)
     info.fMask = 0x40 | 0x100   # keep the process handle; finish before returning
+    info.hwnd = window
     info.lpVerb = "runas"
     info.lpFile = command[0]
     info.lpParameters = subprocess.list2cmdline(command[1:])
     info.lpDirectory = str(cwd) if cwd else None
     info.nShow = 0
+    # The shell does this through COM, which wants this thread set up for it.
+    # 0 and 1 are "done" and "was already": both are ours to undo.
+    com = ole32.CoInitializeEx(None, 0x2 | 0x4) in (0, 1)
     # The new process is given this one's environment. Without PyInstaller's
     # own variables in it, so that it unpacks itself (see clean_environment).
     hidden = {k: os.environ.pop(k) for k in list(os.environ)
@@ -343,12 +419,15 @@ def _run_with_permission(command, cwd=None):
         error = ctypes.get_last_error()
     finally:
         os.environ.update(hidden)
+        if com:
+            ole32.CoUninitialize()
     if not started:
         if error == _CANCELLED:
             return None
         raise OSError(error, ctypes.FormatError(error).strip())
     try:
-        kernel32.WaitForSingleObject(info.hProcess, 0xFFFFFFFF)
+        if kernel32.WaitForSingleObject(info.hProcess, int(limit * 1000)) == 0x102:
+            raise TimeoutError
         code = wintypes.DWORD(1)
         kernel32.GetExitCodeProcess(info.hProcess, ctypes.byref(code))
         return code.value
@@ -356,20 +435,28 @@ def _run_with_permission(command, cwd=None):
         kernel32.CloseHandle(info.hProcess)
 
 
-def place_as_admin(target, source):
-    """Place the kit in a folder that belongs to the system: Windows asks for
-    permission, and the program, started again with it, does `place`."""
+def open_as_admin(target):
+    """Make the kit's folder in a place that belongs to the system, and open
+    it to this account: Windows asks for permission, and the program, started
+    again with it, does `open_folder_from_command`. Nothing is copied yet."""
     report = Path(tempfile.gettempdir()) / f"devkit-setup-{os.getpid()}.json"
     report.unlink(missing_ok=True)
-    command = _own_command() + [PLACE_FLAG, str(target), "--source", str(source),
-                                "--for", account_sid(), "--report", str(report)]
+    command = _own_command() + [OPEN_FLAG, str(target), "--for", account_sid(),
+                                "--report", str(report)]
     log.info("asking Windows for permission to install in %s", target)
     try:
         code = _run_with_permission(
-            command, cwd=None if paths.frozen() else paths.source_root())
+            command, cwd=None if paths.frozen() else paths.source_root(),
+            window=_setup_window())
+    except TimeoutError:
+        log.error("the permitted half did not finish")
+        raise Refused(f"Windows gave permission, but the folder {target} was not "
+                      f"ready after {PERMITTED_LIMIT} seconds. Press the button "
+                      f"again, or choose another folder.") from None
     except OSError as exc:
         raise Refused(f"Windows could not ask for permission to install in "
                       f"{target} ({exc.strerror or exc}). Choose another folder.") from None
+    log.info("the permission question ended with %s", code)
     if code is None:
         raise Refused(f"Windows asked for permission to install in {target} and "
                       f"the answer was no. Press the button again, or choose "
@@ -383,31 +470,33 @@ def place_as_admin(target, source):
     if not answer.get("ok"):
         raise Refused(answer.get("error")
                       or f"The install in {target} did not finish (code {code}).")
-    _writable(target)   # the kit runs as this account, not as the one that placed it
-    return Path(target) / Path(source).name
 
 
-def install(target, shortcut=True, source=None):
+def install(target, shortcut=True, source=None, tell=None):
     """Put the running program in `target` and return the installed program.
 
-    `place` does the writing in the install folder — with Windows' permission
-    where the folder is the system's. What is the artist's own (the note of
-    where the kit is, the Desktop shortcut) is always written as the artist.
+    Where the folder is the system's, Windows is asked once to make it and
+    open it to this account (`open_as_admin`); everything else — the copy
+    (`place`), the note of where the kit is, the Desktop shortcut — is done
+    here, as the artist. `tell(step, fraction=None)` hears each step as it
+    starts: "permission", "copying" (with how far), "finishing", "shortcut".
     """
+    tell = tell or (lambda step, fraction=None: None)
     source = Path(source or paths.program_path())
     target = Path(target)
     if source.suffix == ".app" and source in [target, *target.parents]:
         raise Refused("That folder is inside the Dev Kit itself.")
     if needs_admin(target):
-        program = place_as_admin(target, source)
-    else:
-        program = place(target, source)
+        tell("permission")
+        open_as_admin(target)
+    program = place(target, source, tell)
     try:
         record_path().parent.mkdir(parents=True, exist_ok=True)
         record_path().write_text(json.dumps({"dir": str(target)}), encoding="utf-8")
     except OSError:
         log.warning("could not note the install folder in %s", record_path())
     if shortcut and sys.platform.startswith("win"):
+        tell("shortcut")
         made = make_shortcut(program)
         log.info("desktop shortcut: %s", made or "not made")
     log.info("installed %s in %s", VERSION, target)
@@ -454,7 +543,10 @@ def make_shortcut(program, folder=None):
         "$s.Description = 'Pixel Pomo Dev Kit'; "
         "$s.Save(); Write-Output $p")
     env = {**paths.clean_environment(), "DEVKIT_LNK_TARGET": str(program),
-           "DEVKIT_LNK_NAME": SHORTCUT_NAME, "DEVKIT_LNK_DIR": str(folder or "")}
+           "DEVKIT_LNK_NAME": SHORTCUT_NAME,
+           # DEVKIT_LNK_DIR set outside is for trying a whole install without
+           # leaving a shortcut on the Desktop of whoever is trying it
+           "DEVKIT_LNK_DIR": str(folder or os.environ.get("DEVKIT_LNK_DIR", ""))}
     try:
         done = subprocess.run(
             ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy",
@@ -488,6 +580,8 @@ class _SetupApi:
         self._existing = existing
         self._window = None
         self._program = None
+        self._lock = threading.Lock()
+        self._state = {"running": False}
 
     def facts(self):
         existing = self._existing
@@ -521,20 +615,68 @@ class _SetupApi:
         return str(picked[0]) if picked else ""
 
     def install(self, text, shortcut):
+        """Start installing and return at once: the page then asks
+        `progress` how it is going. The work is on a thread of its own, one
+        that does not keep the program alive - closing the setup window ends
+        the setup, even while Windows' question is still unanswered."""
         try:
             target = target_for(text)
-            program = install(target, shortcut=bool(shortcut))
         except Refused as exc:
             return {"error": str(exc)}
+        with self._lock:
+            if self._state.get("running"):
+                return {"started": True}
+            self._state = {"running": True, "step": "", "fraction": 0.0,
+                           "busy": True, "text": "Starting", "hint": ""}
+        threading.Thread(target=self._install, args=(target, bool(shortcut)),
+                         daemon=True, name="install").start()
+        return {"started": True}
+
+    def _tell(self, step, fraction=None):
+        text, hint, start, end = _STEPS[step]
+        with self._lock:
+            self._state.update(
+                step=step, text=text, hint=hint, busy=fraction is None,
+                fraction=start + (end - start) * (fraction or 0.0))
+
+    def _install(self, target, shortcut):
+        try:
+            program = install(target, shortcut=shortcut, tell=self._tell)
+        except Refused as exc:
+            outcome = {"error": str(exc)}
         except Exception as exc:  # noqa: BLE001 - the page must get an answer
             log.exception("install failed")
-            return {"error": f"The install did not finish: {exc}"}
-        self._program = program
-        return {"ok": True, "target": str(target), "files": str(target / paths.FILES)}
+            outcome = {"error": f"The install did not finish: {exc}"}
+        else:
+            self._program = program
+            outcome = {"done": True, "fraction": 1.0, "text": "Installed",
+                       "target": str(target), "files": str(target / paths.FILES)}
+        with self._lock:
+            self._state.update(outcome, running=False, busy=False, hint="")
+
+    def progress(self):
+        """How the install is going: `running`, the `step` and its `text`, a
+        `hint` for a step that waits on the artist, `fraction` of the whole
+        (0 to 1) and `busy` when the step cannot say how far it is - then,
+        once, `done` with where the kit is, or `error`."""
+        with self._lock:
+            return dict(self._state)
 
     def close(self):
         if self._window is not None:
             self._window.destroy()
+
+
+# What each step of an install says, and its share of the bar: (text, hint,
+# from, to). Copying is the one step that knows how far it is.
+_STEPS = {
+    "permission": ("Waiting for Windows - answer Yes to its question",
+                   "No question on the screen? It is waiting behind this window: "
+                   "click the shield flashing on the taskbar.", 0.04, 0.04),
+    "copying": ("Copying the Dev Kit", "", 0.10, 0.85),
+    "finishing": ("Writing down the install", "", 0.88, 0.88),
+    "shortcut": ("Putting a shortcut on the Desktop", "", 0.93, 0.93),
+}
 
 
 def _logo():
@@ -557,8 +699,8 @@ def run_setup(existing=None):
     import webview
     api = _SetupApi(existing)
     api._window = webview.create_window(
-        "Pixel Pomo Dev Kit Setup", html=setup_page(), js_api=api,
-        width=760, height=650, resizable=False, background_color=window.BACKGROUND)
+        SETUP_TITLE, html=setup_page(), js_api=api,
+        width=760, height=685, resizable=False, background_color=window.BACKGROUND)
     icon = window.icon_path()
     webview.start(icon=str(icon) if icon else None)
     return api._program
@@ -610,6 +752,16 @@ _PAGE = """<!doctype html>
   .box { margin-top: 16px; padding: 12px 14px; border: 2px solid #333; background: #1d1d1d; }
   .path { color: #7fd6a0; word-break: break-all; }
   .error { color: #ff7a7a; min-height: 22px; margin-top: 12px; }
+  #progress { margin-top: 18px; }
+  .bar { height: 16px; border: 2px solid #8a8a8a; background: #0e0e0e;
+         overflow: hidden; position: relative; }
+  .bar > div { height: 100%; width: 0; background: #e5484d; transition: width .15s linear; }
+  .bar.busy > div { transition: none; background: repeating-linear-gradient(
+         90deg, #e5484d 0 12px, #8f2a2e 12px 24px); background-size: 24px 100%;
+         animation: march .5s linear infinite; }
+  @keyframes march { to { background-position: 24px 0; } }
+  #step { margin-top: 8px; display: flex; justify-content: space-between; gap: 12px; }
+  #hint { margin-top: 4px; color: #f2c94c; min-height: 44px; }
   .check { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
   .check input { width: 18px; height: 18px; accent-color: #e5484d; }
   footer { display: flex; gap: 10px; margin-top: 22px; }
@@ -639,6 +791,12 @@ _PAGE = """<!doctype html>
       <input type="checkbox" id="shortcut" checked>
       <label for="shortcut" style="margin:0;color:#f2f2f2;font-size:14px;letter-spacing:0">Put a shortcut on the Desktop</label>
     </div>
+    <div id="progress" hidden>
+      <div class="bar" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+           aria-labelledby="stepText"><div id="fill"></div></div>
+      <div id="step"><span id="stepText"></span><span id="percent"></span></div>
+      <div id="hint"></div>
+    </div>
     <div class="error" id="error" role="alert"></div>
     <footer>
       <button type="button" class="main" id="install">INSTALL</button>
@@ -658,15 +816,61 @@ _PAGE = """<!doctype html>
 </main>
 <script>
 const $ = (id) => document.getElementById(id);
-let api = null, updating = false;
+let api = null, updating = false, installing = false, wantsAdmin = false;
+
+// While installing, the page asks how far it is instead of waiting for one
+// answer at the end: the bar, the step in words, and what to do when the
+// step is waiting on a question from Windows.
+function show(p) {
+  $('bar').classList.toggle('busy', !!p.busy);
+  const percent = Math.round((p.fraction || 0) * 100);
+  $('fill').style.width = Math.max(percent, p.busy ? 6 : 0) + '%';
+  $('bar').setAttribute('aria-valuenow', percent);
+  $('stepText').textContent = (p.text || '') + '...';
+  $('percent').textContent = percent + '%';
+  $('hint').textContent = p.hint || '';
+}
+
+function setInstalling(on) {
+  installing = on;
+  for (const id of ['folder', 'browse', 'shortcut']) $(id).disabled = on;
+  $('progress').hidden = !on;
+  // the two lines the bar takes the place of: both are about what is next,
+  // and what is next has started
+  $('shortcutRow').hidden = on || !windows;
+  $('admin').hidden = on || !wantsAdmin;
+  $('install').disabled = on;
+  $('install').textContent = on ? (updating ? 'UPDATING...' : 'INSTALLING...')
+                                : (updating ? 'UPDATE' : 'INSTALL');
+}
+
+async function watch() {
+  let p;
+  try { p = await api.progress(); } catch (e) { p = {running: true}; }
+  if (p.error) { setInstalling(false); $('error').textContent = p.error; refresh(); return; }
+  if (p.done) {
+    show(p);
+    $('ask').hidden = true; $('done').hidden = false;
+    $('doneText').textContent = updating ? 'Updated. Everything you added is still there.'
+                                         : 'Installed.';
+    $('doneTarget').textContent = p.target; $('doneFiles').textContent = p.files;
+    $('open').focus();
+    return;
+  }
+  show(p);
+  setTimeout(watch, 150);
+}
+let windows = false;
 
 async function refresh() {
   const r = await api.resolve($('folder').value);
   $('error').textContent = r.error || '';
   $('target').textContent = r.target || '';
   $('files').textContent = r.files || '';
+  if (installing) return;
   $('install').disabled = !!r.error;
-  $('admin').hidden = !r.admin;
+  wantsAdmin = !!r.admin;
+  $('admin').hidden = !wantsAdmin;
   updating = !!r.update;
   $('install').textContent = updating ? 'UPDATE' : 'INSTALL';
 }
@@ -679,7 +883,8 @@ async function start() {
     ? 'Version ' + (f.existingVersion || 'older') + ' is installed. Updating it keeps everything you added.'
     : 'Choose where the Dev Kit lives. It gets one folder, and your files stay in it.';
   $('folder').value = f.folder;
-  $('shortcutRow').hidden = !f.windows;
+  windows = !!f.windows;
+  $('shortcutRow').hidden = !windows;
   $('folder').addEventListener('input', refresh);
   $('browse').addEventListener('click', async () => {
     const picked = await api.browse($('folder').value);
@@ -688,15 +893,12 @@ async function start() {
   $('cancel').addEventListener('click', () => api.close());
   $('open').addEventListener('click', () => api.close());
   $('install').addEventListener('click', async () => {
-    $('install').disabled = true;
-    $('install').textContent = updating ? 'UPDATING...' : 'INSTALLING...';
+    $('error').textContent = '';
+    setInstalling(true);
+    show({busy: true, fraction: 0, text: 'Starting'});
     const r = await api.install($('folder').value, $('shortcut').checked);
-    if (r.error) { $('error').textContent = r.error; refresh(); return; }
-    $('ask').hidden = true; $('done').hidden = false;
-    $('doneText').textContent = updating ? 'Updated. Everything you added is still there.'
-                                         : 'Installed.';
-    $('doneTarget').textContent = r.target; $('doneFiles').textContent = r.files;
-    $('open').focus();
+    if (r.error) { setInstalling(false); $('error').textContent = r.error; refresh(); return; }
+    watch();
   });
   refresh();
 }

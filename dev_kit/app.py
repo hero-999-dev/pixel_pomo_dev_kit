@@ -153,10 +153,10 @@ def set_up(action, subject):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    if argv[:1] == [installer.PLACE_FLAG]:
+    if argv[:1] == [installer.OPEN_FLAG]:
         # the half of an install that Windows gave permission to
         _log_to(paths.per_user_dir(), "setup.log")
-        return installer.place_from_command(argv[1:])
+        return installer.open_folder_from_command(argv[1:])
 
     action, subject = installer.decide()
     if action != "run":
