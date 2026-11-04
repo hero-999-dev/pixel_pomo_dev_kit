@@ -224,9 +224,10 @@ swaps the two and starts the new kit.
 - A kit that is not installed (run from source, or with `DEVKIT_DATA`) says
   that a newer version exists and where; it does not swap itself.
 
-**That repository does not exist yet** — nothing has been pushed — so today
-UPDATE answers "No version of the Dev Kit has been published yet." The
-mechanism itself has been run end to end against a pretend release (below).
+The repository is public and its releases are what UPDATE reads: a v0.1.3
+installed from its release saw v0.1.4 when it opened and took itself there
+(see *What has and has not been tried*). Before the first release the
+mechanism was run end to end against a pretend release served on this machine.
 
 ## How it is put together
 
